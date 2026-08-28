@@ -160,7 +160,11 @@ def send_email(api_key, email_from, email_to, subject, text_body):
         RESEND_URL,
         data=body,
         method="POST",
-        headers={"content-type": "application/json", "authorization": f"Bearer {api_key}"},
+        headers={
+            "content-type": "application/json",
+            "authorization": f"Bearer {api_key}",
+            "user-agent": "tipitaka-xploration-daily-translate/1.0",
+        },
     )
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
