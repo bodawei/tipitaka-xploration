@@ -162,8 +162,12 @@ def send_email(api_key, email_from, email_to, subject, text_body):
         method="POST",
         headers={"content-type": "application/json", "authorization": f"Bearer {api_key}"},
     )
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        return resp.read()
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return resp.read()
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise urllib.error.HTTPError(exc.url, exc.code, f"{exc.reason}: {detail}", exc.headers, None) from None
 
 
 def next_run_number(translation_dir, date_str):
