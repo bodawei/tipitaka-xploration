@@ -131,7 +131,7 @@ def call_anthropic(api_key, model, filename, heading, chunk):
     body = json.dumps(
         {
             "model": model,
-            "max_tokens": 4096,
+            "max_tokens": 16000,
             "system": system,
             "messages": [{"role": "user", "content": user_msg}],
         }
@@ -149,6 +149,14 @@ def call_anthropic(api_key, model, filename, heading, chunk):
     )
     with urllib.request.urlopen(req, timeout=120) as resp:
         result = json.loads(resp.read().decode("utf-8"))
+
+    stop_reason = result.get("stop_reason")
+    if stop_reason == "max_tokens":
+        raise RuntimeError(
+            "Translation truncated: hit max_tokens output cap. "
+            "Increase max_tokens or reduce CHUNK_SIZE."
+        )
+
     return "".join(block["text"] for block in result["content"] if block["type"] == "text")
 
 
