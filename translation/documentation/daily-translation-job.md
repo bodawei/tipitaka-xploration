@@ -7,14 +7,14 @@ position for next time.
 
 ## Flow
 
-1. Load `state/translation-progress.json` — `{"file": "<name>.mul.xml", "next_verse": N}`.
+1. Load `translation/state/translation-progress.json` — `{"file": "<name>.mul.xml", "next_verse": N}`.
 2. Parse that file (`romn/<name>.mul.xml`) and select the next chunk of verses
    starting at `next_verse` (see "Verse and chunk model" below).
 3. Translate the chunk's Pali text to English via the Anthropic API.
 4. Email the English translation via the Resend API.
-5. Write three archive files to `translation/` (Pali only, English only, and a
-   combined record — see `translation/README.md`).
-6. Update `state/translation-progress.json` to point at the verse after the
+5. Write the archive files to `translation/results/` (Pali only, one per
+   target language, and a combined record — see `translation/results/README.md`).
+6. Update `translation/state/translation-progress.json` to point at the verse after the
    last one translated (or the start of the next file, if the chunk reached
    the end of the current one).
 7. The GitHub Actions workflow commits and pushes the updated state and any
@@ -31,9 +31,16 @@ following unnumbered `<p rend="bodytext">` continuation paragraphs. Verse
 numbers increase monotonically through a file with no resets.
 
 A **chunk** is up to `CHUNK_SIZE` consecutive verses (default 20) starting
-from the saved position, but it never crosses a chapter/kanda boundary —
-concretely, it stops as soon as the verse's immediate parent `<div>` element
-changes, even if that means fewer than `CHUNK_SIZE` verses that day.
+from the saved position, but it never crosses a section boundary — so it may
+contain fewer than `CHUNK_SIZE` verses. A chunk stops before a verse that:
+
+- has a different immediate parent `<div>` (a chapter/kanda boundary), or
+- begins a new intra-chapter section — marked by a new-section subhead
+  (`<p rend="subhead">`) and/or a closing trailer for the previous section
+  (a centred paragraph or `<trailer>` containing "niṭṭhit", e.g.
+  "Sudinnabhāṇavāro niṭṭhito."). These markers sit between verses within a
+  single `<div>`, so they are detected in document order rather than by the
+  parent-`<div>` check.
 
 **File order**: all `romn/*.mul.xml` files, sorted alphabetically, treated as
 a circular list. Progress is seeded to start at `vin01m.mul.xml`, verse 1.
@@ -42,11 +49,11 @@ the alphabetically-first file.
 
 ## File and directory layout
 
-- `scripts/daily_translate.py` — the job's entire logic (stdlib-only Python,
-  no pip install required).
-- `state/translation-progress.json` — current position (file + next verse).
-- `translation/` — daily archive output (`pali-`, `eng-`, `full-` files per
-  run; see `translation/README.md`).
+- `translation/scripts/daily_translate.py` — the job's entire logic (stdlib-only
+  Python, no pip install required).
+- `translation/state/translation-progress.json` — current position (file + next verse).
+- `translation/results/` — daily archive output (`pali-`, `eng-`, `zh-`, `full-`
+  files per run; see `translation/results/README.md`).
 - `.github/workflows/daily-translation.yml` — the scheduled workflow.
 
 ## Configuration
@@ -87,7 +94,7 @@ Actions tab even in that fallback case.
 - Dates and run numbering (`run1`, `run2`, ...) use UTC, matching the cron
   schedule.
 - The email body contains the English translation only; the Pali text and
-  the combined record are archived on disk in `translation/`, not emailed.
+  the combined record are archived on disk in `translation/results/`, not emailed.
 - File ordering is alphabetical across all `romn/*.mul.xml` files, not a
   curated canonical reading order — it starts at `vin01m.mul.xml` and wraps
   around after the last file.

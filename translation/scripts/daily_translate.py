@@ -26,6 +26,35 @@ RESEND_URL = "https://api.resend.com/emails"
 
 WHITESPACE_RE = re.compile(r"\s+")
 
+ENGLISH_SYSTEM = (
+    "You are an expert translator of Pali Buddhist canonical texts (the Tipitaka), "
+    "working from IAST Latin-transliterated Pali. Translate the passage into clear, "
+    "faithful, readable English prose. Translate strictly verse by verse: output one "
+    "entry per verse, each starting with its verse number in brackets like '[12]', "
+    "followed only by the English translation of that verse. Preserve proper nouns "
+    "(place names, personal names) transliterated sensibly. Do not add commentary, "
+    "headers, or any text beyond the verse-by-verse translations."
+)
+
+CHINESE_SYSTEM = (
+    "You are an expert translator of Pali Buddhist canonical texts (the Tipitaka), "
+    "working from IAST Latin-transliterated Pali. Translate the passage into clear, "
+    "faithful, readable Traditional Chinese (繁體中文) prose. Translate strictly verse "
+    "by verse: output one entry per verse, each starting with its verse number in "
+    "brackets like '[12]', followed only by the Traditional Chinese translation of that "
+    "verse. Preserve proper nouns (place names, personal names) using established "
+    "Chinese Buddhist renderings where they exist, otherwise transliterate sensibly. "
+    "Use Traditional Chinese characters only, never Simplified. Do not add commentary, "
+    "headers, or any text beyond the verse-by-verse translations."
+)
+
+# Ordered list of target languages. Each is translated from the same Pali chunk,
+# archived to its own file (code-YYYY-MM-DD-runN.txt), and emailed separately.
+LANGUAGES = [
+    {"code": "eng", "label": "English", "system": ENGLISH_SYSTEM},
+    {"code": "zh", "label": "Traditional Chinese", "system": CHINESE_SYSTEM},
+]
+
 
 def normalize(text):
     return WHITESPACE_RE.sub(" ", text).strip()
@@ -41,6 +70,22 @@ def clean_text(elem):
             parts.append(clean_text(child))
         parts.append(child.tail or "")
     return "".join(parts)
+
+
+def starts_new_section(elem):
+    """Whether `elem` is an intra-chapter section boundary marker.
+
+    Sections within a single <div> are delimited by a subhead title for the
+    new section (`<p rend="subhead">`) and/or a closing trailer for the
+    previous one — a centred paragraph or <trailer> containing "niṭṭhit"
+    (niṭṭhito / niṭṭhitaṃ, "is finished"). A chunk must not cross such a
+    boundary, even though it does not coincide with a <div> boundary.
+    """
+    if elem.tag == "p" and elem.get("rend") == "subhead":
+        return True
+    if elem.tag == "trailer" or (elem.tag == "p" and elem.get("rend") == "centre"):
+        return "niṭṭhit" in normalize(clean_text(elem))
+    return False
 
 
 def heading_path(div_node, parent_map):
@@ -63,14 +108,24 @@ def parse_verses(filepath):
 
     verses = []
     current = None
-    for p in root.iter("p"):
-        if p.get("rend") != "bodytext":
+    section_pending = False
+    for el in root.iter():
+        if starts_new_section(el):
+            section_pending = True
             continue
-        n = p.get("n")
-        text = normalize(clean_text(p))
+        if el.tag != "p" or el.get("rend") != "bodytext":
+            continue
+        n = el.get("n")
+        text = normalize(clean_text(el))
         if n is not None:
-            current = {"n": int(n), "parent": parent_map.get(p), "texts": [text]}
+            current = {
+                "n": int(n),
+                "parent": parent_map.get(el),
+                "texts": [text],
+                "section_start": section_pending,
+            }
             verses.append(current)
+            section_pending = False
         elif current is not None:
             current["texts"].append(text)
 
@@ -96,7 +151,12 @@ def select_chunk(files, source_dir, state, chunk_size):
         chunk = [verses[start_i]]
         parent = verses[start_i]["parent"]
         i = start_i + 1
-        while len(chunk) < chunk_size and i < len(verses) and verses[i]["parent"] is parent:
+        while (
+            len(chunk) < chunk_size
+            and i < len(verses)
+            and verses[i]["parent"] is parent
+            and not verses[i]["section_start"]
+        ):
             chunk.append(verses[i])
             i += 1
 
@@ -115,16 +175,7 @@ def format_pali(chunk):
     return "\n\n".join(f"[{v['n']}] {' '.join(v['texts'])}" for v in chunk)
 
 
-def call_anthropic(api_key, model, filename, heading, chunk):
-    system = (
-        "You are an expert translator of Pali Buddhist canonical texts (the Tipitaka), "
-        "working from IAST Latin-transliterated Pali. Translate the passage into clear, "
-        "faithful, readable English prose. Translate strictly verse by verse: output one "
-        "entry per verse, each starting with its verse number in brackets like '[12]', "
-        "followed only by the English translation of that verse. Preserve proper nouns "
-        "(place names, personal names) transliterated sensibly. Do not add commentary, "
-        "headers, or any text beyond the verse-by-verse translations."
-    )
+def call_anthropic(api_key, model, system, filename, heading, chunk):
     heading_str = " — ".join(heading) if heading else "(untitled section)"
     user_msg = f"Text: {filename}\nSection: {heading_str}\n\n{format_pali(chunk)}"
 
@@ -183,7 +234,8 @@ def send_email(api_key, email_from, email_to, subject, text_body):
 
 
 def next_run_number(translation_dir, date_str):
-    pattern = re.compile(rf"^(?:pali|eng|full)-{re.escape(date_str)}-run(\d+)\.txt$")
+    codes = "|".join(re.escape(lang["code"]) for lang in LANGUAGES)
+    pattern = re.compile(rf"^(?:pali|full|{codes})-{re.escape(date_str)}-run(\d+)\.txt$")
     max_run = 0
     if os.path.isdir(translation_dir):
         for name in os.listdir(translation_dir):
@@ -193,21 +245,24 @@ def next_run_number(translation_dir, date_str):
     return max_run + 1
 
 
-def write_translation_files(translation_dir, date_str, run_n, header, translation, pali_text):
+def write_translation_files(translation_dir, date_str, run_n, header, translations, pali_text):
     os.makedirs(translation_dir, exist_ok=True)
     suffix = f"{date_str}-run{run_n}.txt"
 
     with open(os.path.join(translation_dir, f"pali-{suffix}"), "w", encoding="utf-8") as f:
         f.write(f"{header}\n{pali_text}\n")
 
-    with open(os.path.join(translation_dir, f"eng-{suffix}"), "w", encoding="utf-8") as f:
-        f.write(f"{header}\n{translation}\n")
+    for code, translation in translations.items():
+        with open(os.path.join(translation_dir, f"{code}-{suffix}"), "w", encoding="utf-8") as f:
+            f.write(f"{header}\n{translation}\n")
 
     with open(os.path.join(translation_dir, f"full-{suffix}"), "w", encoding="utf-8") as f:
-        f.write(
-            f"{header}\n{translation}\n\n"
-            f"{'-' * 40}\nOriginal (Pali, IAST):\n\n{pali_text}\n"
-        )
+        f.write(f"{header}\n{translations['eng']}\n\n")
+        for lang in LANGUAGES:
+            if lang["code"] == "eng":
+                continue
+            f.write(f"{'-' * 40}\n{lang['label']}:\n\n{translations[lang['code']]}\n\n")
+        f.write(f"{'-' * 40}\nOriginal (Pali, IAST):\n\n{pali_text}\n")
 
 
 def send_error_report(api_key, email_from, email_to, context, exc):
@@ -223,8 +278,8 @@ def send_error_report(api_key, email_from, email_to, context, exc):
 
 def main():
     source_dir = os.environ.get("SOURCE_DIR", "romn")
-    state_path = os.environ.get("STATE_FILE", "state/translation-progress.json")
-    translation_dir = os.environ.get("TRANSLATION_DIR", "translation")
+    state_path = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
+    translation_dir = os.environ.get("TRANSLATION_DIR", "translation/results")
     chunk_size = int(os.environ.get("CHUNK_SIZE", "20"))
     model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
     dry_run = os.environ.get("DRY_RUN") == "1"
@@ -259,20 +314,26 @@ def main():
             print(f"{header}\n{translation}")
             return
 
-        translation = call_anthropic(os.environ["ANTHROPIC_API_KEY"], model, filename, heading, chunk)
+        translations = {}
+        for lang in LANGUAGES:
+            print(f"Translating to {lang['label']}...")
+            translations[lang["code"]] = call_anthropic(
+                os.environ["ANTHROPIC_API_KEY"], model, lang["system"], filename, heading, chunk
+            )
 
-        subject = f"Tipitaka reading: {filename} verses {verse_range} — {heading_str}"
-        send_email(
-            os.environ["RESEND_API_KEY"],
-            os.environ["EMAIL_FROM"],
-            os.environ["EMAIL_TO"],
-            subject,
-            f"{header}\n{translation}",
-        )
+            label_suffix = "" if lang["code"] == "eng" else f" ({lang['label']})"
+            subject = f"Tipitaka reading{label_suffix}: {filename} verses {verse_range} — {heading_str}"
+            send_email(
+                os.environ["RESEND_API_KEY"],
+                os.environ["EMAIL_FROM"],
+                os.environ["EMAIL_TO"],
+                subject,
+                f"{header}\n{translations[lang['code']]}",
+            )
 
         date_str = datetime.now(timezone.utc).date().isoformat()
         run_n = next_run_number(translation_dir, date_str)
-        write_translation_files(translation_dir, date_str, run_n, header, translation, pali_text)
+        write_translation_files(translation_dir, date_str, run_n, header, translations, pali_text)
 
         with open(state_path, "w", encoding="utf-8") as f:
             json.dump(new_state, f, indent=2)
