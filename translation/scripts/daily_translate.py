@@ -48,11 +48,49 @@ CHINESE_SYSTEM = (
     "headers, or any text beyond the verse-by-verse translations."
 )
 
+ENGLISH_SUMMARY_SYSTEM = (
+    "You are an expert translator and abridger of Pali Buddhist canonical texts "
+    "(the Tipitaka), working from IAST Latin-transliterated Pali. You are given the "
+    "full Pali text of one complete section. Produce a single condensed English "
+    "prose summary of the whole section: flowing paragraphs, NOT verse by verse, "
+    "with no verse numbers. Convey the essential narrative and doctrinal content "
+    "faithfully but very concisely — the summary should be roughly one tenth the "
+    "length of the source (about a 90% reduction). Preserve proper nouns (place "
+    "names, personal names) transliterated sensibly. Output only the summary prose, "
+    "with no headers, labels, or commentary."
+)
+
+CHINESE_SUMMARY_SYSTEM = (
+    "You are an expert translator and abridger of Pali Buddhist canonical texts "
+    "(the Tipitaka), working from IAST Latin-transliterated Pali. You are given the "
+    "full Pali text of one complete section. Produce a single condensed Traditional "
+    "Chinese (繁體中文) prose summary of the whole section: flowing paragraphs, NOT "
+    "verse by verse, with no verse numbers. Convey the essential narrative and "
+    "doctrinal content faithfully but very concisely — the summary should be roughly "
+    "one tenth the length of the source (about a 90% reduction). Preserve proper "
+    "nouns (place names, personal names) using established Chinese Buddhist renderings "
+    "where they exist, otherwise transliterate sensibly. Use Traditional Chinese "
+    "characters only, never Simplified. Output only the summary prose, with no "
+    "headers, labels, or commentary."
+)
+
 # Ordered list of target languages. Each is translated from the same Pali chunk,
 # archived to its own file (code-YYYY-MM-DD-runN.txt), and emailed separately.
+# When a chunk completes a section, `summary_system` drives a condensed prose
+# summary of the whole section, which is emailed (not archived).
 LANGUAGES = [
-    {"code": "eng", "label": "English", "system": ENGLISH_SYSTEM},
-    {"code": "zh", "label": "Traditional Chinese", "system": CHINESE_SYSTEM},
+    {
+        "code": "eng",
+        "label": "English",
+        "system": ENGLISH_SYSTEM,
+        "summary_system": ENGLISH_SUMMARY_SYSTEM,
+    },
+    {
+        "code": "zh",
+        "label": "Traditional Chinese",
+        "system": CHINESE_SYSTEM,
+        "summary_system": CHINESE_SUMMARY_SYSTEM,
+    },
 ]
 
 GLOSSARY_MARKER = "=== NEW GLOSSARY TERMS ==="
@@ -184,7 +222,28 @@ def select_chunk(files, source_dir, state, chunk_size):
             new_idx = (idx + 1) % len(files)
             new_state = {"file": files[new_idx], "next_verse": 1}
 
-        return filename, chunk, chunk[0]["heading"], new_state
+        # The chunk completes a section when the verse that would follow it
+        # begins a new section — a new parent <div> (khanda/chapter boundary),
+        # an intra-div section start, or the end of the file. In that case,
+        # gather the whole just-finished section (which may have begun in an
+        # earlier run) by walking back to its first verse.
+        section_ended = (
+            i >= len(verses)
+            or verses[i]["parent"] is not parent
+            or verses[i]["section_start"]
+        )
+        section_verses = None
+        if section_ended:
+            sec_start = start_i
+            while (
+                sec_start > 0
+                and not verses[sec_start]["section_start"]
+                and verses[sec_start - 1]["parent"] is verses[sec_start]["parent"]
+            ):
+                sec_start -= 1
+            section_verses = verses[sec_start:i]
+
+        return filename, chunk, chunk[0]["heading"], new_state, section_verses
 
     raise RuntimeError("No numbered verses found in any source file")
 
@@ -193,20 +252,12 @@ def format_pali(chunk):
     return "\n\n".join(f"[{v['n']}] {' '.join(v['texts'])}" for v in chunk)
 
 
-def call_anthropic(api_key, model, system, filename, heading, chunk, glossary=""):
-    heading_str = " — ".join(heading) if heading else "(untitled section)"
-    glossary_block = (
-        f"Established glossary (reuse these renderings):\n{glossary}\n\n"
-        if glossary.strip()
-        else ""
-    )
-    user_msg = f"{glossary_block}Text: {filename}\nSection: {heading_str}\n\n{format_pali(chunk)}"
-
+def anthropic_message(api_key, model, system, user_msg, truncation_hint):
     body = json.dumps(
         {
             "model": model,
             "max_tokens": 16000,
-            "system": system + GLOSSARY_INSTRUCTION,
+            "system": system,
             "messages": [{"role": "user", "content": user_msg}],
         }
     ).encode("utf-8")
@@ -224,14 +275,44 @@ def call_anthropic(api_key, model, system, filename, heading, chunk, glossary=""
     with urllib.request.urlopen(req, timeout=120) as resp:
         result = json.loads(resp.read().decode("utf-8"))
 
-    stop_reason = result.get("stop_reason")
-    if stop_reason == "max_tokens":
-        raise RuntimeError(
-            "Translation truncated: hit max_tokens output cap. "
-            "Increase max_tokens or reduce CHUNK_SIZE."
-        )
+    if result.get("stop_reason") == "max_tokens":
+        raise RuntimeError(truncation_hint)
 
     return "".join(block["text"] for block in result["content"] if block["type"] == "text")
+
+
+def glossary_block(glossary):
+    if not glossary.strip():
+        return ""
+    return f"Established glossary (reuse these renderings):\n{glossary}\n\n"
+
+
+def call_anthropic(api_key, model, system, filename, heading, chunk, glossary=""):
+    heading_str = " — ".join(heading) if heading else "(untitled section)"
+    user_msg = (
+        f"{glossary_block(glossary)}Text: {filename}\n"
+        f"Section: {heading_str}\n\n{format_pali(chunk)}"
+    )
+    return anthropic_message(
+        api_key, model, system + GLOSSARY_INSTRUCTION, user_msg,
+        "Translation truncated: hit max_tokens output cap. "
+        "Increase max_tokens or reduce CHUNK_SIZE.",
+    )
+
+
+def summarize_section(api_key, model, system, filename, heading, section_verses, glossary=""):
+    """Condensed prose summary of a whole section (verse boundaries flattened)."""
+    heading_str = " — ".join(heading) if heading else "(untitled section)"
+    pali_prose = " ".join(" ".join(v["texts"]) for v in section_verses)
+    user_msg = (
+        f"{glossary_block(glossary)}Text: {filename}\n"
+        f"Section: {heading_str}\n\n{pali_prose}"
+    )
+    return anthropic_message(
+        api_key, model, system, user_msg,
+        "Section summary truncated: hit max_tokens output cap. "
+        "The section may be too long to summarise in one call.",
+    )
 
 
 def glossary_path(glossary_dir, code):
@@ -339,8 +420,11 @@ def send_email(api_key, email_from, email_to, subject, text_body):
 
 
 def next_run_number(translation_dir, date_str):
-    codes = "|".join(re.escape(lang["code"]) for lang in LANGUAGES)
-    pattern = re.compile(rf"^(?:pali|full|{codes})-{re.escape(date_str)}-run(\d+)\.txt$")
+    prefixes = ["pali", "full"]
+    for lang in LANGUAGES:
+        prefixes += [lang["code"], f"summary-{lang['code']}"]
+    alt = "|".join(re.escape(p) for p in prefixes)
+    pattern = re.compile(rf"^(?:{alt})-{re.escape(date_str)}-run(\d+)\.txt$")
     max_run = 0
     if os.path.isdir(translation_dir):
         for name in os.listdir(translation_dir):
@@ -368,6 +452,14 @@ def write_translation_files(translation_dir, date_str, run_n, header, translatio
                 continue
             f.write(f"{'-' * 40}\n{lang['label']}:\n\n{translations[lang['code']]}\n\n")
         f.write(f"{'-' * 40}\nOriginal (Pali, IAST):\n\n{pali_text}\n")
+
+
+def write_summary_files(translation_dir, date_str, run_n, header, summaries):
+    os.makedirs(translation_dir, exist_ok=True)
+    suffix = f"{date_str}-run{run_n}.txt"
+    for code, summary in summaries.items():
+        with open(os.path.join(translation_dir, f"summary-{code}-{suffix}"), "w", encoding="utf-8") as f:
+            f.write(f"{header}\n{summary}\n")
 
 
 def send_error_report(api_key, email_from, email_to, context, exc):
@@ -400,7 +492,9 @@ def main():
             state = json.load(f)
         context = f"file={state.get('file')}, next_verse={state.get('next_verse')}"
 
-        filename, chunk, heading, new_state = select_chunk(files, source_dir, state, chunk_size)
+        filename, chunk, heading, new_state, section_verses = select_chunk(
+            files, source_dir, state, chunk_size
+        )
         verse_numbers = [v["n"] for v in chunk]
         verse_range = (
             str(verse_numbers[0])
@@ -446,9 +540,46 @@ def main():
                 f"{header}\n{translations[code]}",
             )
 
+        summaries = {}
+        sec_header = None
+        if section_verses:
+            sec_nums = [v["n"] for v in section_verses]
+            sec_range = (
+                str(sec_nums[0]) if len(sec_nums) == 1
+                else f"{sec_nums[0]}-{sec_nums[-1]}"
+            )
+            sec_heading = section_verses[0]["heading"]
+            sec_heading_str = " — ".join(sec_heading) if sec_heading else filename
+            sec_header = (
+                f"{sec_heading_str}\n{filename}, section verses {sec_range} "
+                f"(condensed prose summary)\n"
+            )
+            print(f"Section complete ({filename} verses {sec_range}); emailing condensed summaries")
+            for lang in LANGUAGES:
+                code = lang["code"]
+                print(f"Summarising section into {lang['label']}...")
+                summaries[code] = summarize_section(
+                    os.environ["ANTHROPIC_API_KEY"], model, lang["summary_system"],
+                    filename, sec_heading, section_verses, glossary=glossaries[code][0],
+                )
+                label_suffix = "" if code == "eng" else f" ({lang['label']})"
+                subject = (
+                    f"Tipitaka section summary{label_suffix}: "
+                    f"{filename} verses {sec_range} — {sec_heading_str}"
+                )
+                send_email(
+                    os.environ["RESEND_API_KEY"],
+                    os.environ["EMAIL_FROM"],
+                    os.environ["EMAIL_TO"],
+                    subject,
+                    f"{sec_header}\n{summaries[code]}",
+                )
+
         date_str = datetime.now(timezone.utc).date().isoformat()
         run_n = next_run_number(translation_dir, date_str)
         write_translation_files(translation_dir, date_str, run_n, header, translations, pali_text)
+        if summaries:
+            write_summary_files(translation_dir, date_str, run_n, sec_header, summaries)
 
         for lang in LANGUAGES:
             code = lang["code"]

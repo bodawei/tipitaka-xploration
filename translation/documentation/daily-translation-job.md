@@ -17,16 +17,20 @@ position for next time.
 4. Translate the chunk's Pali text into each target language via the Anthropic
    API. Each response also reports any new key terms it introduced.
 5. Email each translation separately via the Resend API.
-6. Write the archive files to `translation/results/` (Pali only, one per
-   target language, and a combined record — see `translation/results/README.md`),
+6. If this chunk completed a section (see "Section summaries" below), gather the
+   whole just-finished section's Pali and email a condensed prose summary in each
+   target language.
+7. Write the archive files to `translation/results/` (Pali only, one per
+   target language, a combined record, and — when a section completed — a
+   `summary-<code>` file per language; see `translation/results/README.md`),
    and append any newly-introduced key terms to each `translation/glossary-<code>.md`.
-7. Update `translation/state/translation-progress.json` to point at the verse after the
+8. Update `translation/state/translation-progress.json` to point at the verse after the
    last one translated (or the start of the next file, if the chunk reached
    the end of the current one).
-8. The GitHub Actions workflow commits and pushes the updated state, new archive
+9. The GitHub Actions workflow commits and pushes the updated state, new archive
    files, and any glossary additions back to the repo.
 
-Steps 3–7 are atomic: if anything fails partway, nothing from that run is
+Steps 3–8 are atomic: if anything fails partway, nothing from that run is
 kept — no partial archive files, no glossary additions, no state advance — so the
 same chunk is simply retried on the next run. See "Error handling" below.
 
@@ -69,6 +73,23 @@ terms are appended to the file on a successful run; entries are never rewritten
 or removed automatically. The files start empty and are created on first use.
 
 The directory is set by `GLOSSARY_DIR` (default `translation`).
+
+## Section summaries
+
+A chunk never crosses a section boundary, so whenever a chunk ends exactly at
+one — an intra-chapter section break, a chapter/kanda `<div>` boundary, or the
+end of a file — that chunk has completed a whole section. When that happens, the
+job gathers the entire just-finished section's Pali (walking back to the
+section's first verse, which may lie in an earlier run's chunk) and, for each
+target language, emails a single condensed **prose** summary: verse boundaries
+are flattened and the text is abridged to roughly one tenth its length (~90%
+reduction). The current glossary is supplied for term consistency, but summaries
+do not themselves add glossary entries.
+
+Each summary is emailed and also archived to
+`translation/results/summary-<code>-YYYY-MM-DD-runN.txt` (sharing the run's date
+and run number). On a chunk that stops mid-section (because it hit `CHUNK_SIZE`),
+no summary is produced.
 
 ## File and directory layout
 
@@ -118,8 +139,11 @@ Actions tab even in that fallback case.
 
 - Dates and run numbering (`run1`, `run2`, ...) use UTC, matching the cron
   schedule.
-- The email body contains the English translation only; the Pali text and
-  the combined record are archived on disk in `translation/results/`, not emailed.
+- Each run emails one message per target language (the verse-by-verse
+  translation), plus, when a section completes, one condensed prose summary per
+  language. The Pali text and the combined record are archived on disk in
+  `translation/results/` but not emailed; the per-language translations and
+  section summaries are both emailed and archived.
 - File ordering is alphabetical across all `romn/*.mul.xml` files, not a
   curated canonical reading order — it starts at `vin01m.mul.xml` and wraps
   around after the last file.
