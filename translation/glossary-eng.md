@@ -20,3 +20,14 @@ Managed automatically — new terms are appended as they first appear.
 | khittacitta | deranged in mind | mentally unhinged, one of the standard exemptions |
 | vedanāṭṭa | overwhelmed by pain | afflicted by feeling, a standard exemption |
 | ādikammika | the first offender | the one whose deed occasioned the laying down of the rule |
+| methunaṃ dhammaṃ paṭisevati | engages in sexual intercourse | lit. "practises the coupling act" |
+| saṅghādisesa | saṅghādisesa offence | class of offence requiring formal action by the Sangha, next below pārājika |
+| dukkaṭa | offence of wrong-doing | minor offence of improper conduct |
+| kukkucca | remorse | anxious scruple about having transgressed |
+| moghapurisa | foolish man | term of rebuke for an erring bhikkhu |
+| nimitta | private part | the sexual organ, esp. of an image or corpse |
+| sikkhaṃ paccakkhāti | renounces the training | formally disavows the monastic training |
+| vibbhamati | leaves the Order | returns to lay life |
+| sādhāraṇa | shared in common | of rules applying alike to bhikkhus and bhikkhunīs |
+| upasampadā | ordination | full admission to the Sangha |
+| upajjhā | preceptor | the teacher under whom one is ordained |

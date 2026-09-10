@@ -26,3 +26,16 @@ Managed automatically — new terms are appended as they first appear.
 | vedanāṭṭa | 苦痛所惱 | 為劇苦所迫 |
 | ādikammika | 最初犯者 | 制戒前之首犯，不成罪 |
 | sāmaṇera | 沙彌 | 未受具戒之出家者 |
+| saṅghādisesa | 僧殘 | 次於波羅夷之罪，須僧眾處理出罪 |
+| dukkaṭa | 突吉羅 | 輕罪、惡作 |
+| methunaṃ dhammaṃ paṭisevati | 行淫法 | 從事性交 |
+| kukkucca | 追悔 | 疑悔、心中不安 |
+| moghapurisa | 愚癡人 | 佛呵責犯戒者之稱 |
+| sikkhaṃ apaccakkhāya | 未捨戒 | 未正式宣捨學處 |
+| dubbalyaṃ anāvikatvā | 未表白戒力羸弱 | 未向他人明示自己不堪持戒 |
+| purāṇadutiyikā | 故二 | 出家前之妻 |
+| divāvihāra | 晝住 | 日間靜住休息 |
+| paṭisallīyati | 宴默 | 獨處靜坐 |
+| sikkhamānā | 式叉摩那 | 正學女 |
+| sivathikā | 塚間 | 棄屍林 |
+| nimitta | 相處 | 此指男女性器之相 |
