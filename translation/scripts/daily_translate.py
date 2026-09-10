@@ -55,6 +55,24 @@ LANGUAGES = [
     {"code": "zh", "label": "Traditional Chinese", "system": CHINESE_SYSTEM},
 ]
 
+GLOSSARY_MARKER = "=== NEW GLOSSARY TERMS ==="
+
+# Appended to every language's system prompt so glossary behaviour is identical
+# across languages. Keeps key-term renderings consistent from run to run.
+GLOSSARY_INSTRUCTION = (
+    "\n\nA glossary of key Pali terms established in previous runs may be provided "
+    "with the passage. Whenever such a term appears, reuse its given rendering "
+    "verbatim so translations stay consistent across runs. Separately, AFTER the "
+    "verse-by-verse translation, if this passage contains key Pali terms that are "
+    "doctrinally significant or genuinely hard to translate and are NOT already in "
+    f"the provided glossary, output a line containing exactly '{GLOSSARY_MARKER}' "
+    "and then one line per new term in the form 'pali | rendering | brief gloss', "
+    "where 'rendering' is the exact wording you used in the target language. "
+    "Include only genuinely key doctrinal or technical terms — never ordinary "
+    "vocabulary or proper names (people, places). If there are no new key terms, "
+    "omit the marker line entirely."
+)
+
 
 def normalize(text):
     return WHITESPACE_RE.sub(" ", text).strip()
@@ -175,15 +193,20 @@ def format_pali(chunk):
     return "\n\n".join(f"[{v['n']}] {' '.join(v['texts'])}" for v in chunk)
 
 
-def call_anthropic(api_key, model, system, filename, heading, chunk):
+def call_anthropic(api_key, model, system, filename, heading, chunk, glossary=""):
     heading_str = " — ".join(heading) if heading else "(untitled section)"
-    user_msg = f"Text: {filename}\nSection: {heading_str}\n\n{format_pali(chunk)}"
+    glossary_block = (
+        f"Established glossary (reuse these renderings):\n{glossary}\n\n"
+        if glossary.strip()
+        else ""
+    )
+    user_msg = f"{glossary_block}Text: {filename}\nSection: {heading_str}\n\n{format_pali(chunk)}"
 
     body = json.dumps(
         {
             "model": model,
             "max_tokens": 16000,
-            "system": system,
+            "system": system + GLOSSARY_INSTRUCTION,
             "messages": [{"role": "user", "content": user_msg}],
         }
     ).encode("utf-8")
@@ -209,6 +232,88 @@ def call_anthropic(api_key, model, system, filename, heading, chunk):
         )
 
     return "".join(block["text"] for block in result["content"] if block["type"] == "text")
+
+
+def glossary_path(glossary_dir, code):
+    return os.path.join(glossary_dir, f"glossary-{code}.md")
+
+
+def read_glossary(path):
+    """Return (raw_markdown, set_of_casefolded_pali_keys) for an existing glossary.
+
+    Missing file -> ("", set()). Keys are the first cell of each table body row,
+    skipping the '| Pali | ... |' header and the '| --- | --- |' separator.
+    """
+    if not os.path.exists(path):
+        return "", set()
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+
+    keys = set()
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        if not cells or not cells[0]:
+            continue
+        first = cells[0]
+        if first.lower() == "pali" or set(first) <= set("-: "):
+            continue
+        keys.add(first.casefold())
+    return text, keys
+
+
+def split_translation_and_terms(response):
+    """Split a model response into (translation_text, [(pali, rendering, gloss), ...]).
+
+    Everything before the GLOSSARY_MARKER line is the verse translation; anything
+    after is parsed as pipe-delimited new-term rows.
+    """
+    body, sep, rest = response.partition(GLOSSARY_MARKER)
+    translation = body.strip()
+    terms = []
+    if sep:
+        for line in rest.splitlines():
+            line = line.strip().strip("|").strip()
+            if not line or "|" not in line:
+                continue
+            cells = [c.strip() for c in line.split("|")]
+            pali = cells[0]
+            if not pali or pali.lower() == "pali" or set(pali) <= set("-: "):
+                continue
+            rendering = cells[1] if len(cells) > 1 else ""
+            gloss = cells[2] if len(cells) > 2 else ""
+            terms.append((pali, rendering, gloss))
+    return translation, terms
+
+
+def append_glossary(path, label, new_terms, existing_keys):
+    """Append genuinely-new terms to the glossary file, creating it if needed."""
+    seen = set(existing_keys)
+    rows = []
+    for pali, rendering, gloss in new_terms:
+        key = pali.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(f"| {pali} | {rendering} | {gloss} |")
+
+    if not rows:
+        return
+
+    new_file = not os.path.exists(path)
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        if new_file:
+            f.write(
+                f"# {label} glossary\n\n"
+                "Key Pali terms and their established renderings, accumulated by the\n"
+                "daily translation job to keep word choices consistent across runs.\n"
+                "Managed automatically — new terms are appended as they first appear.\n\n"
+                f"| Pali | {label} | Notes |\n| --- | --- | --- |\n"
+            )
+        f.write("\n".join(rows) + "\n")
 
 
 def send_email(api_key, email_from, email_to, subject, text_body):
@@ -280,6 +385,7 @@ def main():
     source_dir = os.environ.get("SOURCE_DIR", "romn")
     state_path = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
     translation_dir = os.environ.get("TRANSLATION_DIR", "translation/results")
+    glossary_dir = os.environ.get("GLOSSARY_DIR", "translation")
     chunk_size = int(os.environ.get("CHUNK_SIZE", "20"))
     model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
     dry_run = os.environ.get("DRY_RUN") == "1"
@@ -314,26 +420,42 @@ def main():
             print(f"{header}\n{translation}")
             return
 
-        translations = {}
-        for lang in LANGUAGES:
-            print(f"Translating to {lang['label']}...")
-            translations[lang["code"]] = call_anthropic(
-                os.environ["ANTHROPIC_API_KEY"], model, lang["system"], filename, heading, chunk
-            )
+        glossaries = {
+            lang["code"]: read_glossary(glossary_path(glossary_dir, lang["code"]))
+            for lang in LANGUAGES
+        }
 
-            label_suffix = "" if lang["code"] == "eng" else f" ({lang['label']})"
+        translations = {}
+        new_terms = {}
+        for lang in LANGUAGES:
+            code = lang["code"]
+            print(f"Translating to {lang['label']}...")
+            response = call_anthropic(
+                os.environ["ANTHROPIC_API_KEY"], model, lang["system"], filename,
+                heading, chunk, glossary=glossaries[code][0],
+            )
+            translations[code], new_terms[code] = split_translation_and_terms(response)
+
+            label_suffix = "" if code == "eng" else f" ({lang['label']})"
             subject = f"Tipitaka reading{label_suffix}: {filename} verses {verse_range} — {heading_str}"
             send_email(
                 os.environ["RESEND_API_KEY"],
                 os.environ["EMAIL_FROM"],
                 os.environ["EMAIL_TO"],
                 subject,
-                f"{header}\n{translations[lang['code']]}",
+                f"{header}\n{translations[code]}",
             )
 
         date_str = datetime.now(timezone.utc).date().isoformat()
         run_n = next_run_number(translation_dir, date_str)
         write_translation_files(translation_dir, date_str, run_n, header, translations, pali_text)
+
+        for lang in LANGUAGES:
+            code = lang["code"]
+            append_glossary(
+                glossary_path(glossary_dir, code), lang["label"],
+                new_terms[code], glossaries[code][1],
+            )
 
         with open(state_path, "w", encoding="utf-8") as f:
             json.dump(new_state, f, indent=2)

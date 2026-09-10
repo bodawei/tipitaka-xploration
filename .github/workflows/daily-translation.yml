@@ -25,6 +25,7 @@ jobs:
       SOURCE_DIR: romn
       STATE_FILE: translation/state/translation-progress.json
       TRANSLATION_DIR: translation/results
+      GLOSSARY_DIR: translation
       CHUNK_SIZE: ${{ inputs.chunk_size || vars.CHUNK_SIZE || '20' }}
       ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || 'claude-sonnet-5' }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -48,6 +49,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add translation/state/translation-progress.json translation/results/
+          git add translation/state/translation-progress.json translation/results/ translation/glossary-*.md
           git diff --cached --quiet || git commit -m "Advance translation progress [skip ci]"
           git push
