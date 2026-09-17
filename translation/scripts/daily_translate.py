@@ -478,7 +478,7 @@ def main():
     state_path = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
     translation_dir = os.environ.get("TRANSLATION_DIR", "translation/results")
     glossary_dir = os.environ.get("GLOSSARY_DIR", "translation")
-    chunk_size = int(os.environ.get("CHUNK_SIZE", "20"))
+    chunk_size = int(os.environ.get("CHUNK_SIZE", "15"))
     model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
     dry_run = os.environ.get("DRY_RUN") == "1"
 
