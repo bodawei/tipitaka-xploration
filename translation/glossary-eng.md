@@ -31,3 +31,13 @@ Managed automatically — new terms are appended as they first appear.
 | sādhāraṇa | shared in common | of rules applying alike to bhikkhus and bhikkhunīs |
 | upasampadā | ordination | full admission to the Sangha |
 | upajjhā | preceptor | the teacher under whom one is ordained |
+| adinnādāna | taking what is not given | theft; the second of the pārājika offences for bhikkhus |
+| theyyasaṅkhāta | by way of theft | with thievish intent, the mental factor qualifying theft |
+| pāda | pāda | a unit of currency, reckoned at five māsakas |
+| māsaka | māsaka | a small coin; five make a pāda |
+| ṭhānā cāveti | shifts it from its place | the decisive act completing the theft |
+| asaṃvāsa | not in communion | excluded from the communal acts and recitation of the Saṅgha |
+| saṃvāsa | communion | a single formal act, a single recitation, an equal training |
+| gāmūpacāra | village precincts | the area around a village measured by a clod's throw |
+| saṅketaṃ vītināmeti | lets pass a marked spot | carrying stolen goods beyond an agreed boundary mark |
+| sikkhāpada | training rule | a rule of the monastic code |

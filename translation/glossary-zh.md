@@ -39,3 +39,16 @@ Managed automatically — new terms are appended as they first appear.
 | sikkhamānā | 式叉摩那 | 正學女 |
 | sivathikā | 塚間 | 棄屍林 |
 | nimitta | 相處 | 此指男女性器之相 |
+| adinnādāna | 不與取 | 取他人未給與之物，即偷盜 |
+| theyyasaṅkhāta | 以盜心 | 懷竊取之心而取 |
+| ṭhānā cāveti | 移離本處 | 使物離開原所在位置，成盜罪之關鍵 |
+| iriyāpathaṃ vikopeti | 壞威儀路 | 使有情或物改變其行止姿態 |
+| asaṃvāsa | 不共住 | 不得與僧共同羯磨、說戒、同學 |
+| saṃvāsa | 共住 | 同一羯磨、同一說戒、同等學處 |
+| pāda | 錢（pāda） | 貨幣單位，王舍城時五摩沙迦為一錢 |
+| māsaka | 摩沙迦 | 最小貨幣單位 |
+| gāmūpacāra | 村界 | 以擲石所及為限之村落周邊界域 |
+| leḍḍupāta | 擲石所及處 | 中等男子擲一土塊所達之距離 |
+| sikkhāpada | 學處 | 佛所制之戒條 |
+| ocaraka | 偵探者 | 為盜事探察者 |
+| saṃvidāvahāra | 共謀竊取 | 事先商議而共同行盜 |
