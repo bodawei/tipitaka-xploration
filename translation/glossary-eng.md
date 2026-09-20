@@ -41,3 +41,12 @@ Managed automatically — new terms are appended as they first appear.
 | gāmūpacāra | village precincts | the area around a village measured by a clod's throw |
 | saṅketaṃ vītināmeti | lets pass a marked spot | carrying stolen goods beyond an agreed boundary mark |
 | sikkhāpada | training rule | a rule of the monastic code |
+| theyyacitta | with thievish mind | the intention to steal accompanying the act |
+| bhūmaṭṭha | resting on the ground | goods lying on or buried in the earth |
+| thalaṭṭha | resting on a surface | goods set down on raised or dry ground |
+| ākāsaṭṭha | standing in the open air | goods unsupported, e.g. growing plants, airborne things |
+| vehāsaṭṭha | suspended aloft | goods hung up on a peg, line, pole, etc. |
+| abhiyuñjati | lays claim to | asserts legal ownership over another's property |
+| dhuraṃ nikkhipati | gives up his claim | abandons the burden of ownership or effort |
+| dhammaṃ carati | goes to law | pursues a lawsuit, litigates |
+| payoga | act | an act or effort of exertion in committing an offence |

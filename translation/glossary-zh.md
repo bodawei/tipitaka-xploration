@@ -52,3 +52,12 @@ Managed automatically — new terms are appended as they first appear.
 | sikkhāpada | 學處 | 佛所制之戒條 |
 | ocaraka | 偵探者 | 為盜事探察者 |
 | saṃvidāvahāra | 共謀竊取 | 事先商議而共同行盜 |
+| theyyacitta | 盜心 | 欲竊取之心 |
+| bhūmaṭṭha | 置於地上 | 埋藏或安置於地中、地面之物 |
+| thalaṭṭha | 置於陸地 | 安置於平地、陸上之物 |
+| ākāsaṭṭha | 置於空中 | 露於空處、未有依託之物 |
+| vehāsaṭṭha | 懸置空中 | 掛於高處之物 |
+| abhiyuñjati | 訴求爭奪 | 以言訟主張他人之產業為己有 |
+| dhuraṃ nikkhipati | 捨棄其權 | 物主放棄所有權之念 |
+| payoga | 加行 | 造作之行為、方便 |
+| phandāpeti | 令動搖 | 使物移動而尚未離本處 |
