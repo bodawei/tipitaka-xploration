@@ -50,3 +50,12 @@ Managed automatically — new terms are appended as they first appear.
 | dhuraṃ nikkhipati | gives up his claim | abandons the burden of ownership or effort |
 | dhammaṃ carati | goes to law | pursues a lawsuit, litigates |
 | payoga | act | an act or effort of exertion in committing an offence |
+| araññaṭṭha | resting in the jungle | goods deposited in forest land possessed by people |
+| vanappati | forest tree | a tree owned and used by human beings |
+| haraṇaka | portable property | another's goods capable of being carried off |
+| upanidhi | goods on deposit | property entrusted to another's keeping |
+| suṅkaghāta | toll barrier | a royal customs post where duty is levied |
+| rājagga | liable to the king's duty | goods on which the king's toll is due |
+| dantapoṇa | tooth-wood | a stick used for cleaning the teeth |
+| mariyādā | embankment | the dyke retaining water in a pond or field |
+| apada | footless creatures | animals without feet, e.g. snakes and fish |

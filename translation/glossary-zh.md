@@ -61,3 +61,11 @@ Managed automatically — new terms are appended as they first appear.
 | dhuraṃ nikkhipati | 捨棄其權 | 物主放棄所有權之念 |
 | payoga | 加行 | 造作之行為、方便 |
 | phandāpeti | 令動搖 | 使物移動而尚未離本處 |
+| upanidhi | 寄存物 | 受他人寄託保管之物 |
+| suṅkaghāta | 稅關 | 王所設收稅之關卡 |
+| vanappati | 林樹 | 人所攝屬受用之大樹 |
+| haraṇaka | 可搬運物 | 他人隨身或可搬運之財物 |
+| dantapoṇa | 齒木 | 潔齒用之木條 |
+| rājagghaṃ bhaṇḍaṃ | 應納王稅之物 | 須向國王繳稅之貨物 |
+| dhammaṃ carati | 依法爭訟 | 提起訴訟、進行法律爭議 |
+| apada / dvipada / catuppada | 無足／二足／四足 | 依足數分類之眾生 |
