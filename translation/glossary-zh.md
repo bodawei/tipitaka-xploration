@@ -69,3 +69,10 @@ Managed automatically — new terms are appended as they first appear.
 | rājagghaṃ bhaṇḍaṃ | 應納王稅之物 | 須向國王繳稅之貨物 |
 | dhammaṃ carati | 依法爭訟 | 提起訴訟、進行法律爭議 |
 | apada / dvipada / catuppada | 無足／二足／四足 | 依足數分類之眾生 |
+| saṅketakamma | 約定作 | 事先相約時刻或暗號而行盜 |
+| nimittakamma | 作相 | 以眨眼、揚眉等暗號示意行盜 |
+| oṇirakkha | 守贓者 | 看守他人所盜搬來之財物者 |
+| mūlaṭṭha | 本源者 | 最初教唆、發起其事之人 |
+| vissāsaggāha | 親厚取 | 因親厚信賴之想而取他物 |
+| tāvakālika | 暫時取用 | 暫借一時而取用 |
+| parapariggahita | 他人所攝屬 | 屬於他人所有、攝受之物 |

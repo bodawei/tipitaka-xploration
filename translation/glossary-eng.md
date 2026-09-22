@@ -59,3 +59,13 @@ Managed automatically — new terms are appended as they first appear.
 | dantapoṇa | tooth-wood | a stick used for cleaning the teeth |
 | mariyādā | embankment | the dyke retaining water in a pond or field |
 | apada | footless creatures | animals without feet, e.g. snakes and fish |
+| ocaraka | scout | one who spies out goods for another to steal |
+| oṇirakkha | warehouse-guard | one who guards goods that have been brought in |
+| saṃvidāvahāra | theft by arrangement | theft committed by several acting in concert |
+| saṅketakamma | making an appointed sign | fixing a prearranged time or signal for a theft |
+| nimittakamma | making a signal | a bodily sign given as the cue for a theft |
+| mūlaṭṭha | the original instigator | the one who first gave the command to steal |
+| parapariggahita | owned by another | belonging to someone else, a condition of theft |
+| vissāsaggāha | taking on trust | taking another's goods on the basis of familiarity |
+| tāvakālika | temporary borrowing | taking something for the time being, intending to return it |
+| parikkhāra | article | a requisite or item of property |
