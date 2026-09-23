@@ -69,3 +69,7 @@ Managed automatically — new terms are appended as they first appear.
 | vissāsaggāha | taking on trust | taking another's goods on the basis of familiarity |
 | tāvakālika | temporary borrowing | taking something for the time being, intending to return it |
 | parikkhāra | article | a requisite or item of property |
+| sakasaññī | perceives it as his own | mistaken perception that the property belongs to oneself |
+| paṃsukūlasaññī | perceives it as a rag from a dust-heap | thinking the item is discarded refuse-cloth, hence ownerless |
+| petapariggaha | owned by a departed spirit | property belonging to a peta, not a human owner |
+| tiracchānagatapariggaha | owned by an animal | property belonging to an animal, not a human owner |

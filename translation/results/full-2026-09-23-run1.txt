@@ -1,0 +1,38 @@
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, verses 127-131
+
+[127] For one taking what is not given under six conditions, there is an offence of wrong-doing: he does not perceive it as his own; he is not taking on trust; it is not temporary borrowing; the article is of slight value, a māsaka or less than a māsaka; and a thievish mind is present. If he touches it, there is an offence of wrong-doing. If he makes it shake, there is an offence of wrong-doing. If he shifts it from its place, there is an offence of wrong-doing.
+
+[128] For one taking what is not given under five conditions, there is an offence of wrong-doing: it is not owned by another, but he perceives it as owned by another; the article is of great value, five māsakas or more than five māsakas; and a thievish mind is present. If he touches it, there is an offence of wrong-doing. If he makes it shake, there is an offence of wrong-doing. If he shifts it from its place, there is an offence of wrong-doing.
+
+[129] For one taking what is not given under five conditions, there is an offence of wrong-doing: it is not owned by another, but he perceives it as owned by another; the article is of slight value, more than a māsaka but less than five māsakas; and a thievish mind is present. If he touches it, there is an offence of wrong-doing. If he makes it shake, there is an offence of wrong-doing. If he shifts it from its place, there is an offence of wrong-doing.
+
+[130] For one taking what is not given under five conditions, there is an offence of wrong-doing: it is not owned by another, but he perceives it as owned by another; the article is of slight value, a māsaka or less than a māsaka; and a thievish mind is present. If he touches it, there is an offence of wrong-doing. If he makes it shake, there is an offence of wrong-doing. If he shifts it from its place, there is an offence of wrong-doing.
+
+[131] There is no offence for one who perceives it as his own; in taking on trust; in temporary borrowing; for what is owned by a departed spirit; for what is owned by an animal; for one who perceives it as a rag from a dust-heap; for one who is mad, (for one deranged in mind, for one overwhelmed by pain,) and for the first offender.
+
+----------------------------------------
+Traditional Chinese:
+
+[127] 以六種行相而取不與取者，犯突吉羅。非自己物想，非親厚取，非暫時取用，資具是輕物，值一摩沙迦或不滿一摩沙迦，且盜心現前。觸摸者，犯突吉羅。令動搖者，犯突吉羅。移離本處者，犯突吉羅。
+
+[128] 以五種行相而取不與取者，犯突吉羅。實非他人所攝屬，而作他人所攝屬想，資具是重物，值五摩沙迦或超過五摩沙迦，且盜心現前。觸摸者，犯突吉羅。令動搖者，犯突吉羅。移離本處者，犯突吉羅。
+
+[129] 以五種行相而取不與取者，犯突吉羅。實非他人所攝屬，而作他人所攝屬想，資具是輕物，值超過一摩沙迦或不滿五摩沙迦，且盜心現前。觸摸者，犯突吉羅。令動搖者，犯突吉羅。移離本處者，犯突吉羅。
+
+[130] 以五種行相而取不與取者，犯突吉羅。實非他人所攝屬，而作他人所攝屬想，資具是輕物，值一摩沙迦或不滿一摩沙迦，且盜心現前。觸摸者，犯突吉羅。令動搖者，犯突吉羅。移離本處者，犯突吉羅。
+
+[131] 無罪：作自己物想者，親厚取者，暫時取用者，餓鬼所攝屬之物，畜生所攝屬之物，作糞掃衣想者，癲狂者，（心亂者、苦痛所惱者，）最初犯者。
+
+----------------------------------------
+Original (Pali, IAST):
+
+[127] Chahi ākārehi adinnaṃ ādiyantassa āpatti dukkaṭassa. Na ca sakasaññī, na ca vissāsaggāhī, na ca tāvakālikaṃ, lahuko ca hoti parikkhāro, māsako vā ūnamāsako vā, theyyacittañca paccupaṭṭhitaṃ hoti. Āmasati, āpatti dukkaṭassa. Phandāpeti, āpatti dukkaṭassa. Ṭhānā cāveti, āpatti dukkaṭassa.
+
+[128] Pañcahi ākārehi adinnaṃ ādiyantassa āpatti dukkaṭassa. Na ca parapariggahitaṃ hoti, parapariggahitasaññī ca, garuko ca hoti parikkhāro, pañcamāsako vā atirekapañcamāsako vā, theyyacittañca paccupaṭṭhitaṃ hoti. Āmasati, āpatti dukkaṭassa. Phandāpeti, āpatti dukkaṭassa. Ṭhānā cāveti, āpatti dukkaṭassa.
+
+[129] Pañcahi ākārehi adinnaṃ ādiyantassa āpatti dukkaṭassa. Na ca parapariggahitaṃ hoti, parapariggahitasaññī ca, lahuko ca hoti parikkhāro, atirekamāsako vā ūnapañcamāsako vā, theyyacittañca paccupaṭṭhitaṃ hoti. Āmasati, āpatti dukkaṭassa. Phandāpeti, āpatti dukkaṭassa. Ṭhānā cāveti, āpatti dukkaṭassa.
+
+[130] Pañcahi ākārehi adinnaṃ ādiyantassa āpatti dukkaṭassa. Na ca parapariggahitaṃ hoti, parapariggahitasaññī ca, lahuko ca hoti parikkhāro, māsako vā ūnamāsako vā, theyyacittañca paccupaṭṭhitaṃ hoti. Āmasati, āpatti dukkaṭassa. Phandāpeti, āpatti dukkaṭassa. Ṭhānā cāveti, āpatti dukkaṭassa.
+
+[131] Anāpatti sasaññissa, vissāsaggāhe, tāvakālike, petapariggahe, tiracchānagatapariggahe, paṃsukūlasaññissa, ummattakassa, (khittacittassa vedanāṭṭassa) ādikammikassāti.

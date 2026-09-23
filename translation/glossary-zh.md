@@ -76,3 +76,6 @@ Managed automatically — new terms are appended as they first appear.
 | vissāsaggāha | 親厚取 | 因親厚信賴之想而取他物 |
 | tāvakālika | 暫時取用 | 暫借一時而取用 |
 | parapariggahita | 他人所攝屬 | 屬於他人所有、攝受之物 |
+| parikkhāra | 資具 | 生活所需之物品、財物 |
+| paṃsukūla | 糞掃衣 | 棄置無主之布，比丘可取用 |
+| petapariggaha | 餓鬼所攝屬 | 屬於餓鬼所有之物 |
