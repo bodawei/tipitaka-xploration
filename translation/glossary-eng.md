@@ -73,3 +73,8 @@ Managed automatically — new terms are appended as they first appear.
 | paṃsukūlasaññī | perceives it as a rag from a dust-heap | thinking the item is discarded refuse-cloth, hence ownerless |
 | petapariggaha | owned by a departed spirit | property belonging to a peta, not a human owner |
 | tiracchānagatapariggaha | owned by an animal | property belonging to an animal, not a human owner |
+| niruttipatha | a manner of speaking | mere figure of speech, not meant literally; a standard exemption |
+| sampajānamusāvāda | deliberate lying | conscious speaking of falsehood |
+| pācittiya | offence of expiation | class of offence requiring confession |
+| paṃsukūla | rag from a dust-heap | discarded cloth taken as robe-material |
+| vighāsa | leavings of a kill | remnants of prey left by a beast of prey |

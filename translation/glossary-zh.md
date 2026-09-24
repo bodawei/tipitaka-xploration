@@ -79,3 +79,9 @@ Managed automatically — new terms are appended as they first appear.
 | parikkhāra | 資具 | 生活所需之物品、財物 |
 | paṃsukūla | 糞掃衣 | 棄置無主之布，比丘可取用 |
 | petapariggaha | 餓鬼所攝屬 | 屬於餓鬼所有之物 |
+| niruttipatha | 語言之道 | 僅係言說之表達方式，非真有盜意 |
+| sakasaññī | 作己物想 | 誤以他物為自己之物 |
+| pācittiya | 波逸提 | 應懺悔之輕罪 |
+| sampajānamusāvāda | 故妄語 | 明知而說虛妄語 |
+| vighāsa | 殘食 | 猛獸食餘之肉 |
+| kusa | 籌籤 | 分物時所用之籌，移換之即成盜 |
