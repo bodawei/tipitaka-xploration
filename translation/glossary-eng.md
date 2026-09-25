@@ -78,3 +78,5 @@ Managed automatically — new terms are appended as they first appear.
 | pācittiya | offence of expiation | class of offence requiring confession |
 | paṃsukūla | rag from a dust-heap | discarded cloth taken as robe-material |
 | vighāsa | leavings of a kill | remnants of prey left by a beast of prey |
+| paṭivisa | portion | an individual share of food distributed among the Saṅgha |
+| suṅkaṭṭhāna | toll-station | the place where the king's customs duty is collected |
