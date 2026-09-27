@@ -80,3 +80,14 @@ Managed automatically — new terms are appended as they first appear.
 | vighāsa | leavings of a kill | remnants of prey left by a beast of prey |
 | paṭivisa | portion | an individual share of food distributed among the Saṅgha |
 | suṅkaṭṭhāna | toll-station | the place where the king's customs duty is collected |
+| asubhabhāvanā | development of the perception of the unattractive | meditation on the foulness of the body |
+| asubhasamāpatti | attainment based on the unattractive | meditative attainment grounded in contemplation of foulness |
+| manussaviggaha | human being | lit. "human form", the object of the third pārājika |
+| satthahāraka | knife-bringer | one who brings a weapon, i.e. an assassin |
+| maraṇavaṇṇaṃ saṃvaṇṇeti | praises the beauty of death | speaking in praise of dying so as to induce death |
+| ānāpānassatisamādhi | concentration through mindfulness of breathing | meditative absorption based on awareness of in- and out-breathing |
+| samaṇakuttaka | sham recluse | one who merely wears the outward guise of an ascetic |
+| kāyasaṅkhāra | bodily formation | the in- and out-breath as conditioner of the body |
+| cittasaṅkhāra | mental formation | perception and feeling as conditioners of the mind |
+| paṭinissaggānupassī | contemplating relinquishment | the final tetrad-step of breath meditation |
+| asecanaka | unadulterated | unmixed, of unalloyed sweetness; epithet of a meditative abiding |

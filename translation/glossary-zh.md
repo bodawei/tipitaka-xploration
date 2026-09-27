@@ -85,3 +85,16 @@ Managed automatically — new terms are appended as they first appear.
 | sampajānamusāvāda | 故妄語 | 明知而說虛妄語 |
 | vighāsa | 殘食 | 猛獸食餘之肉 |
 | kusa | 籌籤 | 分物時所用之籌，移換之即成盜 |
+| asubhabhāvanā | 修不淨觀 | 觀身不淨之修習 |
+| asubhasamāpatti | 不淨定 | 不淨觀之等至 |
+| ānāpānassatisamādhi | 入出息念三昧 | 依出入息念所成之定 |
+| manussaviggaha | 人體 | 人之身形，指人類生命 |
+| satthahāraka | 持刀者 | 受託執刀行殺者 |
+| maraṇavaṇṇaṃ saṃvaṇṇeti | 讚歎死之美好 | 稱揚死勝於生，勸人求死 |
+| samādapeti | 勸導 | 勸勉令取、令行 |
+| kāyasaṅkhāra | 身行 | 入出息等身之造作 |
+| cittasaṅkhāra | 心行 | 受想等心之造作 |
+| paṭinissaggānupassī | 隨觀捨遣 | 觀捨離、棄捨 |
+| vipāceti | 責備 | 公開宣揚不滿 |
+| sugatiṃ saggaṃ lokaṃ | 善趣天界 | 命終後生之善處 |
+| pañca kāmaguṇā | 五欲功德 | 色聲香味觸五種欲境 |
