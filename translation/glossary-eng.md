@@ -91,3 +91,15 @@ Managed automatically — new terms are appended as they first appear.
 | cittasaṅkhāra | mental formation | perception and feeling as conditioners of the mind |
 | paṭinissaggānupassī | contemplating relinquishment | the final tetrad-step of breath meditation |
 | asecanaka | unadulterated | unmixed, of unalloyed sweetness; epithet of a meditative abiding |
+| sañcicca | intentionally | deliberately, with full awareness and purpose |
+| jīvitā voropeti | deprives of life | cuts off the life-faculty; the act constituting the third pārājika |
+| adhiṭṭhāya | by command | having resolved upon it and given an order to kill |
+| vadhaka | the killer | the one who actually carries out the deed of killing |
+| visakkiya dūta | a messenger who goes astray | a messenger who passes the commission on to another |
+| opāta | pit-trap | a pit dug so that someone will fall in and die |
+| apassena | leaning-support | a board or prop rigged so as to cause death |
+| upanikkhipana | placing a weapon nearby | leaving a means of death within reach |
+| upahāra | presenting | bringing an object of sense before someone so as to cause death |
+| ācikkhanā | telling | giving deadly advice when asked |
+| anusāsanī | instructing | giving deadly advice unasked |
+| alābhaka | not obtaining | pining away through failure to get a desired object |

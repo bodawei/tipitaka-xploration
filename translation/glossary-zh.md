@@ -98,3 +98,12 @@ Managed automatically — new terms are appended as they first appear.
 | vipāceti | 責備 | 公開宣揚不滿 |
 | sugatiṃ saggaṃ lokaṃ | 善趣天界 | 命終後生之善處 |
 | pañca kāmaguṇā | 五欲功德 | 色聲香味觸五種欲境 |
+| adhiṭṭhāya | 教敕 | 下令指示他人行殺 |
+| opāta | 掘坑 | 為害人而掘之陷坑 |
+| apassena | 倚靠物 | 於人所倚處設機關害之 |
+| upanikkhipana | 安置凶器 | 預先放置刀毒繩等致死之物 |
+| rūpūpahāra | 示色 | 現色境以致人死 |
+| dhammūpahāra | 示法 | 說法（地獄、天界事）以致人死 |
+| ācikkhanā | 告知 | 受問而教人致死之法 |
+| anusāsanī | 教示 | 未受問而教人致死之法 |
+| namaraṇādhippāya | 無致死之意圖 | 不存令他人死之心 |
