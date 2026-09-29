@@ -107,3 +107,10 @@ Managed automatically — new terms are appended as they first appear.
 | ācikkhanā | 告知 | 受問而教人致死之法 |
 | anusāsanī | 教示 | 未受問而教人致死之法 |
 | namaraṇādhippāya | 無致死之意圖 | 不存令他人死之心 |
+| gabbhapātana | 墮胎之藥（墮胎） | 使胎兒墮落之藥或方法 |
+| kulūpaka bhikkhu | 常來家中的比丘 | 出入某俗家、與其親近之比丘 |
+| asañcicca | 非故意 | 無故意心，不成重罪 |
+| vīmaṃsādhippāya | 試驗之意圖 | 欲試探、實驗之心，非致死意圖 |
+| adhimutta | 心生嚮往 | 傾心於所聞（如天界）而致命終 |
+| aggakārikā | 最先一分 | 食物中最先分出供養之部分 |
+| bhūtavejjaka | 擅長咒鬼之術者 | 驅役鬼神之咒術師 |

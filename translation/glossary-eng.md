@@ -103,3 +103,9 @@ Managed automatically — new terms are appended as they first appear.
 | ācikkhanā | telling | giving deadly advice when asked |
 | anusāsanī | instructing | giving deadly advice unasked |
 | alābhaka | not obtaining | pining away through failure to get a desired object |
+| maraṇādhippāya | with the intention of causing death | the mental factor determining the third pārājika |
+| namaraṇādhippāya | one who had no intention of causing death | standard exemption clause |
+| asañcicca | unintentional | not done deliberately; standard exemption |
+| gabbhapātana | abortifacient | a means of procuring abortion |
+| kulūpaka bhikkhu | a bhikkhu who frequented the family | a monk who regularly visits a particular household |
+| vīmaṃsādhippāya | intending to make a test | acting out of a wish to experiment, not to kill |
