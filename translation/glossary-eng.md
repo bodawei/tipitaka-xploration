@@ -109,3 +109,16 @@ Managed automatically — new terms are appended as they first appear.
 | gabbhapātana | abortifacient | a means of procuring abortion |
 | kulūpaka bhikkhu | a bhikkhu who frequented the family | a monk who regularly visits a particular household |
 | vīmaṃsādhippāya | intending to make a test | acting out of a wish to experiment, not to kill |
+| uttarimanussadhamma | superhuman state | states surpassing ordinary human attainment: jhānas, liberations, paths and fruits |
+| alamariyañāṇadassana | knowledge and vision worthy of the noble ones | the standard qualifying phrase for a claim of superhuman attainment |
+| attupanāyika | of himself | referring or applying the attainment to oneself |
+| adhimāna | overestimation | mistaken conceit of having attained; the exemption in the fourth pārājika |
+| aññaṃ byākaroti | declares final knowledge | proclaims arahantship |
+| abbohārika | not to be reckoned as an offence | outside formal legal reckoning |
+| samanuggāhīyamāna | being cross-questioned | formally examined about a claimed attainment |
+| visuddhāpekkha | looking for purification | wishing to be cleared, e.g. by returning to lay status |
+| garubhaṇḍa | heavy property | the inalienable communal property of the Saṅgha |
+| vimokkha | liberation | the empty, signless and undirected liberations |
+| samāpatti | attainment | meditative attainment |
+| suññāgāre abhirati | delight in an empty hut | solitary meditative delight, reckoned a superhuman state |
+| adhimānena aññaṃ byākaroti | declares final knowledge through overestimation | claims attainment in good faith but mistakenly |

@@ -114,3 +114,17 @@ Managed automatically — new terms are appended as they first appear.
 | adhimutta | 心生嚮往 | 傾心於所聞（如天界）而致命終 |
 | aggakārikā | 最先一分 | 食物中最先分出供養之部分 |
 | bhūtavejjaka | 擅長咒鬼之術者 | 驅役鬼神之咒術師 |
+| uttarimanussadhamma | 上人法 | 超越凡人之法，如禪定、聖果、神通 |
+| adhimāna | 增上慢 | 未證謂證之錯誤認定，非故意妄語 |
+| abbohārika | 不成違犯 | 不入罪之判定，不算作違犯 |
+| alamariyañāṇadassana | 足以成聖之智見 | 足使人成為聖者之智與見 |
+| samanuggāhīyamāna | 被詰問 | 就所自稱之事受人審問 |
+| visuddhāpekkha | 欲求清淨 | 欲捨比丘身分以求清淨 |
+| mahācora | 大賊 | 世間五種大賊之喻，指惡比丘 |
+| garubhaṇḍa | 重物 | 僧伽不可分配之貴重財物 |
+| anuddhaṃseti | 誹謗 | 以無根之罪誣指他人 |
+| vijjā (tisso vijjā) | 三明 | 宿命明、天眼明、漏盡明 |
+| vimokkha | 解脫 | 空、無相、無願三解脫 |
+| samāpatti | 等至 | 定之成就境界 |
+| suññāgāre abhirati | 於空閑處之喜樂 | 依禪定而樂住空靜處 |
+| salākāvutta | 憑籌分食 | 饑饉時以籌券配給食物 |
