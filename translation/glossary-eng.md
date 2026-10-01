@@ -122,3 +122,16 @@ Managed automatically — new terms are appended as they first appear.
 | samāpatti | attainment | meditative attainment |
 | suññāgāre abhirati | delight in an empty hut | solitary meditative delight, reckoned a superhuman state |
 | adhimānena aññaṃ byākaroti | declares final knowledge through overestimation | claims attainment in good faith but mistakenly |
+| vinidhāya diṭṭhiṃ | he misrepresents his view | distorting one's actual view when making a false claim |
+| vinidhāya khantiṃ | he misrepresents his belief | distorting one's actual conviction |
+| vinidhāya ruciṃ | he misrepresents his preference | distorting one's actual liking or inclination |
+| vinidhāya bhāvaṃ | he misrepresents his state | distorting one's actual condition |
+| vinīvaraṇa | unobstructed | free from the obstruction or hindrance of a defilement |
+| tisso vijjā | the three true knowledges | recollection of past lives, the divine eye, destruction of the taints |
+| satipaṭṭhāna | foundation of mindfulness | the four establishments of mindfulness |
+| sammappadhāna | right striving | the four right exertions |
+| iddhipāda | basis of psychic power | the four roads to spiritual power |
+| bojjhaṅga | factor of enlightenment | the seven awakening factors |
+| suññata vimokkha | empty liberation | liberation through contemplation of emptiness |
+| animitta vimokkha | signless liberation | liberation through contemplation of the signless |
+| appaṇihita vimokkha | undirected liberation | liberation through contemplation of the undirected |

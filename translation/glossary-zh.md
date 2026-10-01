@@ -128,3 +128,22 @@ Managed automatically — new terms are appended as they first appear.
 | samāpatti | 等至 | 定之成就境界 |
 | suññāgāre abhirati | 於空閑處之喜樂 | 依禪定而樂住空靜處 |
 | salākāvutta | 憑籌分食 | 饑饉時以籌券配給食物 |
+| vinidhāya diṭṭhiṃ | 違隱其見 | 隱覆真實之見解而說異語 |
+| vinidhāya khantiṃ | 違隱其忍可 | 隱覆內心所認可者而說異語 |
+| vinidhāya ruciṃ | 違隱其意樂 | 隱覆內心所好樂者而說異語 |
+| vinidhāya bhāvaṃ | 違隱其實況 | 隱覆實際情狀而說異語 |
+| suññata-vimokkha | 空解脫 | 三解脫之一，觀無我而脫 |
+| animitta-vimokkha | 無相解脫 | 三解脫之一，觀無相而脫 |
+| appaṇihita-vimokkha | 無願解脫 | 三解脫之一，觀無所願求而脫 |
+| satipaṭṭhāna | 念處 | 四念處，身受心法之正念住 |
+| sammappadhāna | 正勤 | 四正勤 |
+| iddhipāda | 神足 | 四神足，欲勤心觀之定 |
+| indriya (pañcindriyāni) | 五根 | 信進念定慧五根 |
+| bala (pañca balāni) | 五力 | 信進念定慧五力 |
+| bojjhaṅga | 覺支 | 七覺支 |
+| ariya aṭṭhaṅgika magga | 八聖道 | 八支聖道 |
+| sotāpattiphala | 須陀洹果 | 預流果 |
+| sakadāgāmiphala | 斯陀含果 | 一來果 |
+| anāgāmiphala | 阿那含果 | 不還果 |
+| arahatta | 阿羅漢果 | 無學果位 |
+| vinīvaraṇa citta | 心離蓋障 | 心不為貪瞋癡所覆蔽 |
