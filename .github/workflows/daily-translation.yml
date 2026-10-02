@@ -1,8 +1,8 @@
 name: Daily Tipitaka Translation
 
 on:
-  schedule:
-    - cron: '0 13 * * *'
+#  schedule:
+#    - cron: '0 13 * * *'
   workflow_dispatch:
     inputs:
       chunk_size:
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SOURCE_DIR: romn
-      STATE_FILE: translation/state/translation-progress.json
+#      STATE_FILE: translation/state/translation-progress.json
       TRANSLATION_DIR: translation/results
       GLOSSARY_DIR: translation
       CHUNK_SIZE: ${{ inputs.chunk_size || vars.CHUNK_SIZE || '20' }}
