@@ -128,19 +128,35 @@ def clean_text(elem):
     return "".join(parts)
 
 
+# Paragraph styles that title a new division of text. The CSCD markup uses a
+# whole family of these at different ranks (nikaya > book > chapter > title >
+# subhead > subsubhead) and picks whichever suits the level being opened, so a
+# section head must be recognised by any of them, not by `subhead` alone — e.g.
+# "3. Tatiyapārājikaṃ" opens its section with `title`. A <head> inside a <div>
+# is already covered by the parent-<div> check in select_chunk.
+SECTION_HEAD_RENDS = frozenset(
+    ("nikaya", "book", "chapter", "title", "subhead", "subsubhead")
+)
+
+# Closing formulae for a just-finished section, carried by a centred paragraph
+# or a <trailer>. Two are in use and they are interchangeable: "... niṭṭhito /
+# niṭṭhitaṃ" ("is finished", e.g. "Sudinnabhāṇavāro niṭṭhito.") and "... samatto
+# / samattaṃ" ("is completed", e.g. "Dutiyapārājikaṃ samattaṃ.").
+SECTION_END_RE = re.compile("niṭṭhit|samatt")
+
+
 def starts_new_section(elem):
     """Whether `elem` is an intra-chapter section boundary marker.
 
-    Sections within a single <div> are delimited by a subhead title for the
-    new section (`<p rend="subhead">`) and/or a closing trailer for the
-    previous one — a centred paragraph or <trailer> containing "niṭṭhit"
-    (niṭṭhito / niṭṭhitaṃ, "is finished"). A chunk must not cross such a
-    boundary, even though it does not coincide with a <div> boundary.
+    Sections within a single <div> are delimited by a heading for the new
+    section (see SECTION_HEAD_RENDS) and/or a closing trailer for the previous
+    one (see SECTION_END_RE). A chunk must not cross such a boundary, even
+    though it does not coincide with a <div> boundary.
     """
-    if elem.tag == "p" and elem.get("rend") == "subhead":
+    if elem.tag == "p" and elem.get("rend") in SECTION_HEAD_RENDS:
         return True
     if elem.tag == "trailer" or (elem.tag == "p" and elem.get("rend") == "centre"):
-        return "niṭṭhit" in normalize(clean_text(elem))
+        return bool(SECTION_END_RE.search(normalize(clean_text(elem))))
     return False
 
 
@@ -246,6 +262,35 @@ def select_chunk(files, source_dir, state, chunk_size):
         return filename, chunk, chunk[0]["heading"], new_state, section_verses
 
     raise RuntimeError("No numbered verses found in any source file")
+
+
+def find_section(verses, verse_n):
+    """The whole section containing verse `verse_n`, as a list of verses.
+
+    Used by the summary backfill (see SUMMARIZE_VERSE), to re-summarise a
+    section whose boundary an earlier run failed to detect.
+    """
+    at = next((i for i, v in enumerate(verses) if v["n"] == verse_n), None)
+    if at is None:
+        raise RuntimeError(f"Verse {verse_n} not found")
+
+    start = at
+    while (
+        start > 0
+        and not verses[start]["section_start"]
+        and verses[start - 1]["parent"] is verses[start]["parent"]
+    ):
+        start -= 1
+
+    end = at + 1
+    while (
+        end < len(verses)
+        and not verses[end]["section_start"]
+        and verses[end]["parent"] is verses[at]["parent"]
+    ):
+        end += 1
+
+    return verses[start:end]
 
 
 def format_pali(chunk):
@@ -462,6 +507,45 @@ def write_summary_files(translation_dir, date_str, run_n, header, summaries):
             f.write(f"{header}\n{summary}\n")
 
 
+def emit_section_summaries(model, filename, section_verses, glossaries):
+    """Summarise a whole section into every language, email each, and return
+    (header, {code: summary}) for archiving."""
+    sec_nums = [v["n"] for v in section_verses]
+    sec_range = (
+        str(sec_nums[0]) if len(sec_nums) == 1
+        else f"{sec_nums[0]}-{sec_nums[-1]}"
+    )
+    sec_heading = section_verses[0]["heading"]
+    sec_heading_str = " — ".join(sec_heading) if sec_heading else filename
+    sec_header = (
+        f"{sec_heading_str}\n{filename}, section verses {sec_range} "
+        f"(condensed prose summary)\n"
+    )
+
+    print(f"Section complete ({filename} verses {sec_range}); emailing condensed summaries")
+    summaries = {}
+    for lang in LANGUAGES:
+        code = lang["code"]
+        print(f"Summarising section into {lang['label']}...")
+        summaries[code] = summarize_section(
+            os.environ["ANTHROPIC_API_KEY"], model, lang["summary_system"],
+            filename, sec_heading, section_verses, glossary=glossaries[code][0],
+        )
+        label_suffix = "" if code == "eng" else f" ({lang['label']})"
+        subject = (
+            f"Tipitaka section summary{label_suffix}: "
+            f"{filename} verses {sec_range} — {sec_heading_str}"
+        )
+        send_email(
+            os.environ["RESEND_API_KEY"],
+            os.environ["EMAIL_FROM"],
+            os.environ["EMAIL_TO"],
+            subject,
+            f"{sec_header}\n{summaries[code]}",
+        )
+    return sec_header, summaries
+
+
 def send_error_report(api_key, email_from, email_to, context, exc):
     subject = f"Tipitaka job ERROR — {context}"
     body = (
@@ -473,6 +557,46 @@ def send_error_report(api_key, email_from, email_to, context, exc):
     send_email(api_key, email_from, email_to, subject, body)
 
 
+def run_backfill_summary(spec, state, source_dir, translation_dir, glossary_dir,
+                         model, dry_run):
+    """Re-issue the section summary for the section containing a given verse.
+
+    Set SUMMARIZE_VERSE to "<verse>" (in the file the state currently points
+    at) or "<file>:<verse>". This emails and archives the summaries exactly as
+    a normal run would, but translates nothing, advances no state, and adds no
+    glossary terms — it exists to recover a summary that an earlier run missed
+    because it failed to detect the section boundary.
+    """
+    filename, _, verse_text = spec.rpartition(":")
+    filename = filename or state["file"]
+    verse_n = int(verse_text)
+
+    verses = parse_verses(os.path.join(source_dir, filename))
+    section_verses = find_section(verses, verse_n)
+    sec_nums = [v["n"] for v in section_verses]
+    print(
+        f"Backfilling summary for {filename} section containing verse {verse_n}: "
+        f"verses {sec_nums[0]}-{sec_nums[-1]}"
+    )
+
+    if dry_run:
+        print("[DRY RUN — summary skipped]")
+        return
+
+    glossaries = {
+        lang["code"]: read_glossary(glossary_path(glossary_dir, lang["code"]))
+        for lang in LANGUAGES
+    }
+    sec_header, summaries = emit_section_summaries(
+        model, filename, section_verses, glossaries
+    )
+
+    date_str = datetime.now(timezone.utc).date().isoformat()
+    run_n = next_run_number(translation_dir, date_str)
+    write_summary_files(translation_dir, date_str, run_n, sec_header, summaries)
+    print("Backfill complete; state left unchanged")
+
+
 def main():
     source_dir = os.environ.get("SOURCE_DIR", "romn")
     state_path = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
@@ -481,6 +605,7 @@ def main():
     chunk_size = int(os.environ.get("CHUNK_SIZE", "15"))
     model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
     dry_run = os.environ.get("DRY_RUN") == "1"
+    summarize_verse = os.environ.get("SUMMARIZE_VERSE", "").strip()
 
     context = "startup"
     try:
@@ -491,6 +616,13 @@ def main():
         with open(state_path, encoding="utf-8") as f:
             state = json.load(f)
         context = f"file={state.get('file')}, next_verse={state.get('next_verse')}"
+
+        if summarize_verse:
+            run_backfill_summary(
+                summarize_verse, state, source_dir, translation_dir, glossary_dir,
+                model, dry_run,
+            )
+            return
 
         filename, chunk, heading, new_state, section_verses = select_chunk(
             files, source_dir, state, chunk_size
@@ -540,40 +672,11 @@ def main():
                 f"{header}\n{translations[code]}",
             )
 
-        summaries = {}
-        sec_header = None
+        sec_header, summaries = None, {}
         if section_verses:
-            sec_nums = [v["n"] for v in section_verses]
-            sec_range = (
-                str(sec_nums[0]) if len(sec_nums) == 1
-                else f"{sec_nums[0]}-{sec_nums[-1]}"
+            sec_header, summaries = emit_section_summaries(
+                model, filename, section_verses, glossaries
             )
-            sec_heading = section_verses[0]["heading"]
-            sec_heading_str = " — ".join(sec_heading) if sec_heading else filename
-            sec_header = (
-                f"{sec_heading_str}\n{filename}, section verses {sec_range} "
-                f"(condensed prose summary)\n"
-            )
-            print(f"Section complete ({filename} verses {sec_range}); emailing condensed summaries")
-            for lang in LANGUAGES:
-                code = lang["code"]
-                print(f"Summarising section into {lang['label']}...")
-                summaries[code] = summarize_section(
-                    os.environ["ANTHROPIC_API_KEY"], model, lang["summary_system"],
-                    filename, sec_heading, section_verses, glossary=glossaries[code][0],
-                )
-                label_suffix = "" if code == "eng" else f" ({lang['label']})"
-                subject = (
-                    f"Tipitaka section summary{label_suffix}: "
-                    f"{filename} verses {sec_range} — {sec_heading_str}"
-                )
-                send_email(
-                    os.environ["RESEND_API_KEY"],
-                    os.environ["EMAIL_FROM"],
-                    os.environ["EMAIL_TO"],
-                    subject,
-                    f"{sec_header}\n{summaries[code]}",
-                )
 
         date_str = datetime.now(timezone.utc).date().isoformat()
         run_n = next_run_number(translation_dir, date_str)

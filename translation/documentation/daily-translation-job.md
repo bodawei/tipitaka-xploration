@@ -45,12 +45,24 @@ from the saved position, but it never crosses a section boundary — so it may
 contain fewer than `CHUNK_SIZE` verses. A chunk stops before a verse that:
 
 - has a different immediate parent `<div>` (a chapter/kanda boundary), or
-- begins a new intra-chapter section — marked by a new-section subhead
-  (`<p rend="subhead">`) and/or a closing trailer for the previous section
-  (a centred paragraph or `<trailer>` containing "niṭṭhit", e.g.
-  "Sudinnabhāṇavāro niṭṭhito."). These markers sit between verses within a
-  single `<div>`, so they are detected in document order rather than by the
-  parent-`<div>` check.
+- begins a new intra-chapter section — marked by a heading for the new section
+  and/or a closing trailer for the previous one. These markers sit between
+  verses within a single `<div>`, so they are detected in document order rather
+  than by the parent-`<div>` check.
+
+Both markers come in several equivalent spellings, and any one of them is
+enough to mark the boundary:
+
+- **New-section heading** — a `<p>` whose `rend` is any of the CSCD heading
+  styles: `nikaya`, `book`, `chapter`, `title`, `subhead`, `subsubhead`. The
+  markup picks whichever rank suits the level being opened, so `subhead` alone
+  is not sufficient — "3. Tatiyapārājikaṃ", which opens a section, is a
+  `title`.
+- **Closing trailer** — a centred paragraph (`<p rend="centre">`) or a
+  `<trailer>` containing either "niṭṭhit" (niṭṭhito / niṭṭhitaṃ, "is
+  finished", e.g. "Sudinnabhāṇavāro niṭṭhito.") or "samatt" (samatto /
+  samattaṃ, "is completed", e.g. "Dutiyapārājikaṃ samattaṃ."). The two
+  formulae are interchangeable.
 
 **File order**: all `romn/*.mul.xml` files, sorted alphabetically, treated as
 a circular list. Progress is seeded to start at `vin01m.mul.xml`, verse 1.
@@ -91,6 +103,16 @@ Each summary is emailed and also archived to
 and run number). On a chunk that stops mid-section (because it hit `CHUNK_SIZE`),
 no summary is produced.
 
+### Backfilling a missed summary
+
+If a section boundary went undetected, its summary was never sent and the job
+has since read past it. Setting `SUMMARIZE_VERSE` to a verse number (or
+`<file>.mul.xml:<verse>`) runs a summary-only pass over the whole section
+containing that verse: it emails and archives the summaries exactly as a normal
+run would, but translates nothing, adds no glossary terms, and leaves the saved
+position untouched. It is also exposed as the `summarize_verse` input on the
+manual `workflow_dispatch` run.
+
 ## File and directory layout
 
 - `translation/scripts/daily_translate.py` — the job's entire logic (stdlib-only
@@ -121,9 +143,10 @@ set to "Read and write permissions" so the job's `GITHUB_TOKEN` can push its
 own commits.
 
 The workflow can also be run manually (`workflow_dispatch`) with an optional
-`chunk_size` override and a `dry_run` toggle that skips the Anthropic call,
+`chunk_size` override, a `dry_run` toggle that skips the Anthropic call,
 the email, the archive files, the glossary updates, and the state update — it
-only logs the selected chunk, for safe testing.
+only logs the selected chunk, for safe testing — and a `summarize_verse` input
+that backfills a missed section summary (see "Backfilling a missed summary").
 
 ## Error handling
 
