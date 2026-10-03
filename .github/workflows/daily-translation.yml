@@ -14,6 +14,10 @@ on:
         required: false
         type: boolean
         default: false
+      summarize_verse:
+        description: 'Backfill only: re-send the section summary for the section containing this verse ("123" or "file.mul.xml:123"). Skips translation and leaves the saved position untouched.'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -33,6 +37,7 @@ jobs:
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
       EMAIL_FROM: ${{ vars.EMAIL_FROM }}
       DRY_RUN: ${{ (inputs.dry_run && '1') || '0' }}
+      SUMMARIZE_VERSE: ${{ inputs.summarize_verse }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,11 +49,14 @@ jobs:
       - name: Run daily translation
         run: python translation/scripts/daily_translate.py
 
+      # Runs even when the translation step failed, so that an email spooled
+      # for retry (translation/state/pending-email/) survives to the next run —
+      # the runner's checkout is thrown away, so an uncommitted spool is lost.
       - name: Commit updated progress state
-        if: env.DRY_RUN != '1'
+        if: ${{ !cancelled() && env.DRY_RUN != '1' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add translation/state/translation-progress.json translation/results/ translation/glossary-*.md
+          git add translation/state/ translation/results/ translation/glossary-*.md
           git diff --cached --quiet || git commit -m "Advance translation progress [skip ci]"
           git push

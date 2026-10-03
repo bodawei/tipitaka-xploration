@@ -93,6 +93,16 @@ LANGUAGES = [
     },
 ]
 
+# Appended to every language's translation prompt. A chunk may contain an
+# abbreviated passage whose number is a range (see parse_verse_number), and the
+# model must not try to tidy that away.
+VERSE_NUMBER_INSTRUCTION = (
+    "\n\nA verse number may be a range, like '[225-240]', where one abbreviated "
+    "passage stands in for a run of elided verses. Translate such a passage as "
+    "the single entry it is, and echo its number back exactly as given, range "
+    "and all — never split it into separate verses and never renumber it."
+)
+
 GLOSSARY_MARKER = "=== NEW GLOSSARY TERMS ==="
 
 # Appended to every language's system prompt so glossary behaviour is identical
@@ -128,20 +138,63 @@ def clean_text(elem):
     return "".join(parts)
 
 
+# Paragraph styles that title a new division of text. The CSCD markup uses a
+# whole family of these at different ranks (nikaya > book > chapter > title >
+# subhead > subsubhead) and picks whichever suits the level being opened, so a
+# section head must be recognised by any of them, not by `subhead` alone — e.g.
+# "3. Tatiyapārājikaṃ" opens its section with `title`. A <head> inside a <div>
+# is already covered by the parent-<div> check in select_chunk.
+SECTION_HEAD_RENDS = frozenset(
+    ("nikaya", "book", "chapter", "title", "subhead", "subsubhead")
+)
+
+# Closing formulae for a just-finished section, carried by a centred paragraph
+# or a <trailer>. Two are in use and they are interchangeable: "... niṭṭhito /
+# niṭṭhitaṃ" ("is finished", e.g. "Sudinnabhāṇavāro niṭṭhito.") and "... samatto
+# / samattaṃ" ("is completed", e.g. "Dutiyapārājikaṃ samattaṃ.").
+SECTION_END_RE = re.compile("niṭṭhit|samatt")
+
+
 def starts_new_section(elem):
     """Whether `elem` is an intra-chapter section boundary marker.
 
-    Sections within a single <div> are delimited by a subhead title for the
-    new section (`<p rend="subhead">`) and/or a closing trailer for the
-    previous one — a centred paragraph or <trailer> containing "niṭṭhit"
-    (niṭṭhito / niṭṭhitaṃ, "is finished"). A chunk must not cross such a
-    boundary, even though it does not coincide with a <div> boundary.
+    Sections within a single <div> are delimited by a heading for the new
+    section (see SECTION_HEAD_RENDS) and/or a closing trailer for the previous
+    one (see SECTION_END_RE). A chunk must not cross such a boundary, even
+    though it does not coincide with a <div> boundary.
     """
-    if elem.tag == "p" and elem.get("rend") == "subhead":
+    if elem.tag == "p" and elem.get("rend") in SECTION_HEAD_RENDS:
         return True
     if elem.tag == "trailer" or (elem.tag == "p" and elem.get("rend") == "centre"):
-        return "niṭṭhit" in normalize(clean_text(elem))
+        return bool(SECTION_END_RE.search(normalize(clean_text(elem))))
     return False
+
+
+# A verse's n= is normally a single number, but an abbreviated passage that
+# stands in for a run of elided verses carries the whole range, e.g.
+# n="225-240". One such paragraph can cover hundreds of verse numbers while
+# being only a few lines of text.
+VERSE_RANGE_RE = re.compile(r"^(\d+)-(\d+)$")
+
+
+def parse_verse_number(raw):
+    """Parse an n= attribute into (first, last). A plain number gives first == last."""
+    raw = raw.strip()
+    if raw.isdigit():
+        n = int(raw)
+        return n, n
+    m = VERSE_RANGE_RE.match(raw)
+    if not m:
+        raise ValueError(f"Unrecognised verse number {raw!r}")
+    first, last = int(m.group(1)), int(m.group(2))
+    if last < first:
+        raise ValueError(f"Reversed verse range {raw!r}")
+    return first, last
+
+
+def verse_label(first, last):
+    """How a verse or span of verses is written in output: "12" or "225-240"."""
+    return str(first) if first == last else f"{first}-{last}"
 
 
 def heading_path(div_node, parent_map):
@@ -174,8 +227,12 @@ def parse_verses(filepath):
         n = el.get("n")
         text = normalize(clean_text(el))
         if n is not None:
+            first, last = parse_verse_number(n)
             current = {
-                "n": int(n),
+                "n": first,
+                "n_last": last,
+                "span": last - first + 1,
+                "label": verse_label(first, last),
                 "parent": parent_map.get(el),
                 "texts": [text],
                 "section_start": section_pending,
@@ -198,22 +255,32 @@ def select_chunk(files, source_dir, state, chunk_size):
         filename = files[idx]
         verses = parse_verses(os.path.join(source_dir, filename))
 
-        start_i = next((i for i, v in enumerate(verses) if v["n"] >= next_verse), None)
+        # Match on n_last so a saved position that lands inside a range still
+        # resumes at the paragraph covering it rather than skipping past it.
+        start_i = next(
+            (i for i, v in enumerate(verses) if v["n_last"] >= next_verse), None
+        )
         if start_i is None:
             idx = (idx + 1) % len(files)
             next_verse = 1
             continue
 
+        # The budget counts verse numbers, not paragraphs, so a range counts for
+        # its whole span. A range is never split: if adding one overshoots
+        # CHUNK_SIZE the chunk simply runs long, and the next one picks up after
+        # the end of the range.
         chunk = [verses[start_i]]
+        span = verses[start_i]["span"]
         parent = verses[start_i]["parent"]
         i = start_i + 1
         while (
-            len(chunk) < chunk_size
+            span < chunk_size
             and i < len(verses)
             and verses[i]["parent"] is parent
             and not verses[i]["section_start"]
         ):
             chunk.append(verses[i])
+            span += verses[i]["span"]
             i += 1
 
         if i < len(verses):
@@ -248,8 +315,39 @@ def select_chunk(files, source_dir, state, chunk_size):
     raise RuntimeError("No numbered verses found in any source file")
 
 
+def find_section(verses, verse_n):
+    """The whole section containing verse `verse_n`, as a list of verses.
+
+    Used by the summary backfill (see SUMMARIZE_VERSE), to re-summarise a
+    section whose boundary an earlier run failed to detect.
+    """
+    at = next(
+        (i for i, v in enumerate(verses) if v["n"] <= verse_n <= v["n_last"]), None
+    )
+    if at is None:
+        raise RuntimeError(f"Verse {verse_n} not found")
+
+    start = at
+    while (
+        start > 0
+        and not verses[start]["section_start"]
+        and verses[start - 1]["parent"] is verses[start]["parent"]
+    ):
+        start -= 1
+
+    end = at + 1
+    while (
+        end < len(verses)
+        and not verses[end]["section_start"]
+        and verses[end]["parent"] is verses[at]["parent"]
+    ):
+        end += 1
+
+    return verses[start:end]
+
+
 def format_pali(chunk):
-    return "\n\n".join(f"[{v['n']}] {' '.join(v['texts'])}" for v in chunk)
+    return "\n\n".join(f"[{v['label']}] {' '.join(v['texts'])}" for v in chunk)
 
 
 def anthropic_message(api_key, model, system, user_msg, truncation_hint):
@@ -294,7 +392,8 @@ def call_anthropic(api_key, model, system, filename, heading, chunk, glossary=""
         f"Section: {heading_str}\n\n{format_pali(chunk)}"
     )
     return anthropic_message(
-        api_key, model, system + GLOSSARY_INSTRUCTION, user_msg,
+        api_key, model, system + VERSE_NUMBER_INSTRUCTION + GLOSSARY_INSTRUCTION,
+        user_msg,
         "Translation truncated: hit max_tokens output cap. "
         "Increase max_tokens or reduce CHUNK_SIZE.",
     )
@@ -397,6 +496,104 @@ def append_glossary(path, label, new_terms, existing_keys):
         f.write("\n".join(rows) + "\n")
 
 
+def warn(message):
+    """Log a non-fatal problem so it is visible without failing the run."""
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        print(f"::warning::{message}")
+    else:
+        print(f"WARNING: {message}")
+
+
+def spool_email(spool_dir, subject, body, context, error):
+    """Persist an email that could not be sent, for a later run to retry.
+
+    The recipient is deliberately not stored: it is a secret, and resolving it
+    from the environment at send time means a retry honours its current value.
+    """
+    os.makedirs(spool_dir, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    for seq in range(1, 1000):
+        path = os.path.join(spool_dir, f"email-{stamp}-{seq:03d}.json")
+        if not os.path.exists(path):
+            break
+    else:
+        raise RuntimeError(f"Email spool is full for timestamp {stamp}")
+
+    write_spool_record(
+        path,
+        {
+            "queued": stamp,
+            "context": context,
+            "subject": subject,
+            "body": body,
+            "attempts": 1,
+            "last_error": error,
+        },
+    )
+    return path
+
+
+def write_spool_record(path, record):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+
+def send_email_or_spool(spool_dir, api_key, email_from, email_to, subject, body, context):
+    """Send an email; on failure spool it to disk rather than failing the run.
+
+    A send failure must not abort the run. The translation has already been
+    made and archived, so aborting would only re-translate and re-send the same
+    chunk next time; spooling keeps the exact message for
+    flush_pending_emails() to retry at the start of a later run.
+    """
+    try:
+        send_email(api_key, email_from, email_to, subject, body)
+        return True
+    except Exception as exc:
+        path = spool_email(
+            spool_dir, subject, body, context, f"{type(exc).__name__}: {exc}"
+        )
+        warn(
+            f"Email failed ({context}): {exc} — spooled to {path} "
+            f"for retry on the next run"
+        )
+        return False
+
+
+def flush_pending_emails(spool_dir, api_key, email_from, email_to):
+    """Retry emails spooled by earlier runs, oldest first.
+
+    Stops at the first failure so the queue keeps its order and a mail service
+    that is still down is not hammered; whatever is left waits for the run
+    after this one.
+    """
+    if not os.path.isdir(spool_dir):
+        return
+    names = sorted(n for n in os.listdir(spool_dir) if n.endswith(".json"))
+    if not names:
+        return
+
+    print(f"Retrying {len(names)} email(s) spooled by earlier runs")
+    for position, name in enumerate(names):
+        path = os.path.join(spool_dir, name)
+        with open(path, encoding="utf-8") as f:
+            record = json.load(f)
+        try:
+            send_email(api_key, email_from, email_to, record["subject"], record["body"])
+        except Exception as exc:
+            record["attempts"] = record.get("attempts", 1) + 1
+            record["last_error"] = f"{type(exc).__name__}: {exc}"
+            write_spool_record(path, record)
+            warn(
+                f"Spooled email still failing ({record.get('context')}): {exc} — "
+                f"{len(names) - position} message(s) left queued"
+            )
+            return
+        os.remove(path)
+        print(f"  resent: {record['subject']}")
+
+
 def send_email(api_key, email_from, email_to, subject, text_body):
     body = json.dumps(
         {"from": email_from, "to": [email_to], "subject": subject, "text": text_body}
@@ -462,7 +659,44 @@ def write_summary_files(translation_dir, date_str, run_n, header, summaries):
             f.write(f"{header}\n{summary}\n")
 
 
-def send_error_report(api_key, email_from, email_to, context, exc):
+def emit_section_summaries(model, filename, section_verses, glossaries, spool_dir):
+    """Summarise a whole section into every language, email each, and return
+    (header, {code: summary}) for archiving."""
+    sec_range = verse_label(section_verses[0]["n"], section_verses[-1]["n_last"])
+    sec_heading = section_verses[0]["heading"]
+    sec_heading_str = " — ".join(sec_heading) if sec_heading else filename
+    sec_header = (
+        f"{sec_heading_str}\n{filename}, section verses {sec_range} "
+        f"(condensed prose summary)\n"
+    )
+
+    print(f"Section complete ({filename} verses {sec_range}); emailing condensed summaries")
+    summaries = {}
+    for lang in LANGUAGES:
+        code = lang["code"]
+        print(f"Summarising section into {lang['label']}...")
+        summaries[code] = summarize_section(
+            os.environ["ANTHROPIC_API_KEY"], model, lang["summary_system"],
+            filename, sec_heading, section_verses, glossary=glossaries[code][0],
+        )
+        label_suffix = "" if code == "eng" else f" ({lang['label']})"
+        subject = (
+            f"Tipitaka section summary{label_suffix}: "
+            f"{filename} verses {sec_range} — {sec_heading_str}"
+        )
+        send_email_or_spool(
+            spool_dir,
+            os.environ["RESEND_API_KEY"],
+            os.environ["EMAIL_FROM"],
+            os.environ["EMAIL_TO"],
+            subject,
+            f"{sec_header}\n{summaries[code]}",
+            f"{filename} section summary {sec_range} ({lang['label']})",
+        )
+    return sec_header, summaries
+
+
+def send_error_report(spool_dir, api_key, email_from, email_to, context, exc):
     subject = f"Tipitaka job ERROR — {context}"
     body = (
         f"The daily Tipitaka translation job failed.\n\n"
@@ -470,7 +704,49 @@ def send_error_report(api_key, email_from, email_to, context, exc):
         f"{type(exc).__name__}: {exc}\n\n"
         f"{traceback.format_exc()}"
     )
-    send_email(api_key, email_from, email_to, subject, body)
+    send_email_or_spool(
+        spool_dir, api_key, email_from, email_to, subject, body,
+        f"error report: {context}",
+    )
+
+
+def run_backfill_summary(spec, state, source_dir, translation_dir, glossary_dir,
+                         spool_dir, model, dry_run):
+    """Re-issue the section summary for the section containing a given verse.
+
+    Set SUMMARIZE_VERSE to "<verse>" (in the file the state currently points
+    at) or "<file>:<verse>". This emails and archives the summaries exactly as
+    a normal run would, but translates nothing, advances no state, and adds no
+    glossary terms — it exists to recover a summary that an earlier run missed
+    because it failed to detect the section boundary.
+    """
+    filename, _, verse_text = spec.rpartition(":")
+    filename = filename or state["file"]
+    verse_n = int(verse_text)
+
+    verses = parse_verses(os.path.join(source_dir, filename))
+    section_verses = find_section(verses, verse_n)
+    print(
+        f"Backfilling summary for {filename} section containing verse {verse_n}: "
+        f"verses {verse_label(section_verses[0]['n'], section_verses[-1]['n_last'])}"
+    )
+
+    if dry_run:
+        print("[DRY RUN — summary skipped]")
+        return
+
+    glossaries = {
+        lang["code"]: read_glossary(glossary_path(glossary_dir, lang["code"]))
+        for lang in LANGUAGES
+    }
+    sec_header, summaries = emit_section_summaries(
+        model, filename, section_verses, glossaries, spool_dir
+    )
+
+    date_str = datetime.now(timezone.utc).date().isoformat()
+    run_n = next_run_number(translation_dir, date_str)
+    write_summary_files(translation_dir, date_str, run_n, sec_header, summaries)
+    print("Backfill complete; state left unchanged")
 
 
 def main():
@@ -478,9 +754,11 @@ def main():
     state_path = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
     translation_dir = os.environ.get("TRANSLATION_DIR", "translation/results")
     glossary_dir = os.environ.get("GLOSSARY_DIR", "translation")
+    spool_dir = os.environ.get("EMAIL_SPOOL_DIR", "translation/state/pending-email")
     chunk_size = int(os.environ.get("CHUNK_SIZE", "15"))
     model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
     dry_run = os.environ.get("DRY_RUN") == "1"
+    summarize_verse = os.environ.get("SUMMARIZE_VERSE", "").strip()
 
     context = "startup"
     try:
@@ -492,15 +770,29 @@ def main():
             state = json.load(f)
         context = f"file={state.get('file')}, next_verse={state.get('next_verse')}"
 
+        # Retry anything an earlier run could not send, before doing any work
+        # of our own — so a transient mail outage self-heals on the next run.
+        if not dry_run:
+            context = "retrying spooled emails"
+            flush_pending_emails(
+                spool_dir,
+                os.environ["RESEND_API_KEY"],
+                os.environ["EMAIL_FROM"],
+                os.environ["EMAIL_TO"],
+            )
+            context = f"file={state.get('file')}, next_verse={state.get('next_verse')}"
+
+        if summarize_verse:
+            run_backfill_summary(
+                summarize_verse, state, source_dir, translation_dir, glossary_dir,
+                spool_dir, model, dry_run,
+            )
+            return
+
         filename, chunk, heading, new_state, section_verses = select_chunk(
             files, source_dir, state, chunk_size
         )
-        verse_numbers = [v["n"] for v in chunk]
-        verse_range = (
-            str(verse_numbers[0])
-            if len(verse_numbers) == 1
-            else f"{verse_numbers[0]}-{verse_numbers[-1]}"
-        )
+        verse_range = verse_label(chunk[0]["n"], chunk[-1]["n_last"])
         heading_str = " — ".join(heading) if heading else filename
         context = f"{filename} verses {verse_range}"
 
@@ -532,48 +824,21 @@ def main():
 
             label_suffix = "" if code == "eng" else f" ({lang['label']})"
             subject = f"Tipitaka reading{label_suffix}: {filename} verses {verse_range} — {heading_str}"
-            send_email(
+            send_email_or_spool(
+                spool_dir,
                 os.environ["RESEND_API_KEY"],
                 os.environ["EMAIL_FROM"],
                 os.environ["EMAIL_TO"],
                 subject,
                 f"{header}\n{translations[code]}",
+                f"{filename} verses {verse_range} ({lang['label']})",
             )
 
-        summaries = {}
-        sec_header = None
+        sec_header, summaries = None, {}
         if section_verses:
-            sec_nums = [v["n"] for v in section_verses]
-            sec_range = (
-                str(sec_nums[0]) if len(sec_nums) == 1
-                else f"{sec_nums[0]}-{sec_nums[-1]}"
+            sec_header, summaries = emit_section_summaries(
+                model, filename, section_verses, glossaries, spool_dir
             )
-            sec_heading = section_verses[0]["heading"]
-            sec_heading_str = " — ".join(sec_heading) if sec_heading else filename
-            sec_header = (
-                f"{sec_heading_str}\n{filename}, section verses {sec_range} "
-                f"(condensed prose summary)\n"
-            )
-            print(f"Section complete ({filename} verses {sec_range}); emailing condensed summaries")
-            for lang in LANGUAGES:
-                code = lang["code"]
-                print(f"Summarising section into {lang['label']}...")
-                summaries[code] = summarize_section(
-                    os.environ["ANTHROPIC_API_KEY"], model, lang["summary_system"],
-                    filename, sec_heading, section_verses, glossary=glossaries[code][0],
-                )
-                label_suffix = "" if code == "eng" else f" ({lang['label']})"
-                subject = (
-                    f"Tipitaka section summary{label_suffix}: "
-                    f"{filename} verses {sec_range} — {sec_heading_str}"
-                )
-                send_email(
-                    os.environ["RESEND_API_KEY"],
-                    os.environ["EMAIL_FROM"],
-                    os.environ["EMAIL_TO"],
-                    subject,
-                    f"{sec_header}\n{summaries[code]}",
-                )
 
         date_str = datetime.now(timezone.utc).date().isoformat()
         run_n = next_run_number(translation_dir, date_str)
@@ -600,6 +865,7 @@ def main():
         if not dry_run:
             try:
                 send_error_report(
+                    spool_dir,
                     os.environ["RESEND_API_KEY"],
                     os.environ["EMAIL_FROM"],
                     os.environ["EMAIL_TO"],
