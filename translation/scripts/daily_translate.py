@@ -442,6 +442,104 @@ def append_glossary(path, label, new_terms, existing_keys):
         f.write("\n".join(rows) + "\n")
 
 
+def warn(message):
+    """Log a non-fatal problem so it is visible without failing the run."""
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        print(f"::warning::{message}")
+    else:
+        print(f"WARNING: {message}")
+
+
+def spool_email(spool_dir, subject, body, context, error):
+    """Persist an email that could not be sent, for a later run to retry.
+
+    The recipient is deliberately not stored: it is a secret, and resolving it
+    from the environment at send time means a retry honours its current value.
+    """
+    os.makedirs(spool_dir, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    for seq in range(1, 1000):
+        path = os.path.join(spool_dir, f"email-{stamp}-{seq:03d}.json")
+        if not os.path.exists(path):
+            break
+    else:
+        raise RuntimeError(f"Email spool is full for timestamp {stamp}")
+
+    write_spool_record(
+        path,
+        {
+            "queued": stamp,
+            "context": context,
+            "subject": subject,
+            "body": body,
+            "attempts": 1,
+            "last_error": error,
+        },
+    )
+    return path
+
+
+def write_spool_record(path, record):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+
+def send_email_or_spool(spool_dir, api_key, email_from, email_to, subject, body, context):
+    """Send an email; on failure spool it to disk rather than failing the run.
+
+    A send failure must not abort the run. The translation has already been
+    made and archived, so aborting would only re-translate and re-send the same
+    chunk next time; spooling keeps the exact message for
+    flush_pending_emails() to retry at the start of a later run.
+    """
+    try:
+        send_email(api_key, email_from, email_to, subject, body)
+        return True
+    except Exception as exc:
+        path = spool_email(
+            spool_dir, subject, body, context, f"{type(exc).__name__}: {exc}"
+        )
+        warn(
+            f"Email failed ({context}): {exc} — spooled to {path} "
+            f"for retry on the next run"
+        )
+        return False
+
+
+def flush_pending_emails(spool_dir, api_key, email_from, email_to):
+    """Retry emails spooled by earlier runs, oldest first.
+
+    Stops at the first failure so the queue keeps its order and a mail service
+    that is still down is not hammered; whatever is left waits for the run
+    after this one.
+    """
+    if not os.path.isdir(spool_dir):
+        return
+    names = sorted(n for n in os.listdir(spool_dir) if n.endswith(".json"))
+    if not names:
+        return
+
+    print(f"Retrying {len(names)} email(s) spooled by earlier runs")
+    for position, name in enumerate(names):
+        path = os.path.join(spool_dir, name)
+        with open(path, encoding="utf-8") as f:
+            record = json.load(f)
+        try:
+            send_email(api_key, email_from, email_to, record["subject"], record["body"])
+        except Exception as exc:
+            record["attempts"] = record.get("attempts", 1) + 1
+            record["last_error"] = f"{type(exc).__name__}: {exc}"
+            write_spool_record(path, record)
+            warn(
+                f"Spooled email still failing ({record.get('context')}): {exc} — "
+                f"{len(names) - position} message(s) left queued"
+            )
+            return
+        os.remove(path)
+        print(f"  resent: {record['subject']}")
+
+
 def send_email(api_key, email_from, email_to, subject, text_body):
     body = json.dumps(
         {"from": email_from, "to": [email_to], "subject": subject, "text": text_body}
@@ -507,7 +605,7 @@ def write_summary_files(translation_dir, date_str, run_n, header, summaries):
             f.write(f"{header}\n{summary}\n")
 
 
-def emit_section_summaries(model, filename, section_verses, glossaries):
+def emit_section_summaries(model, filename, section_verses, glossaries, spool_dir):
     """Summarise a whole section into every language, email each, and return
     (header, {code: summary}) for archiving."""
     sec_nums = [v["n"] for v in section_verses]
@@ -536,17 +634,19 @@ def emit_section_summaries(model, filename, section_verses, glossaries):
             f"Tipitaka section summary{label_suffix}: "
             f"{filename} verses {sec_range} — {sec_heading_str}"
         )
-        send_email(
+        send_email_or_spool(
+            spool_dir,
             os.environ["RESEND_API_KEY"],
             os.environ["EMAIL_FROM"],
             os.environ["EMAIL_TO"],
             subject,
             f"{sec_header}\n{summaries[code]}",
+            f"{filename} section summary {sec_range} ({lang['label']})",
         )
     return sec_header, summaries
 
 
-def send_error_report(api_key, email_from, email_to, context, exc):
+def send_error_report(spool_dir, api_key, email_from, email_to, context, exc):
     subject = f"Tipitaka job ERROR — {context}"
     body = (
         f"The daily Tipitaka translation job failed.\n\n"
@@ -554,11 +654,14 @@ def send_error_report(api_key, email_from, email_to, context, exc):
         f"{type(exc).__name__}: {exc}\n\n"
         f"{traceback.format_exc()}"
     )
-    send_email(api_key, email_from, email_to, subject, body)
+    send_email_or_spool(
+        spool_dir, api_key, email_from, email_to, subject, body,
+        f"error report: {context}",
+    )
 
 
 def run_backfill_summary(spec, state, source_dir, translation_dir, glossary_dir,
-                         model, dry_run):
+                         spool_dir, model, dry_run):
     """Re-issue the section summary for the section containing a given verse.
 
     Set SUMMARIZE_VERSE to "<verse>" (in the file the state currently points
@@ -588,7 +691,7 @@ def run_backfill_summary(spec, state, source_dir, translation_dir, glossary_dir,
         for lang in LANGUAGES
     }
     sec_header, summaries = emit_section_summaries(
-        model, filename, section_verses, glossaries
+        model, filename, section_verses, glossaries, spool_dir
     )
 
     date_str = datetime.now(timezone.utc).date().isoformat()
@@ -602,6 +705,7 @@ def main():
     state_path = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
     translation_dir = os.environ.get("TRANSLATION_DIR", "translation/results")
     glossary_dir = os.environ.get("GLOSSARY_DIR", "translation")
+    spool_dir = os.environ.get("EMAIL_SPOOL_DIR", "translation/state/pending-email")
     chunk_size = int(os.environ.get("CHUNK_SIZE", "15"))
     model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
     dry_run = os.environ.get("DRY_RUN") == "1"
@@ -617,10 +721,22 @@ def main():
             state = json.load(f)
         context = f"file={state.get('file')}, next_verse={state.get('next_verse')}"
 
+        # Retry anything an earlier run could not send, before doing any work
+        # of our own — so a transient mail outage self-heals on the next run.
+        if not dry_run:
+            context = "retrying spooled emails"
+            flush_pending_emails(
+                spool_dir,
+                os.environ["RESEND_API_KEY"],
+                os.environ["EMAIL_FROM"],
+                os.environ["EMAIL_TO"],
+            )
+            context = f"file={state.get('file')}, next_verse={state.get('next_verse')}"
+
         if summarize_verse:
             run_backfill_summary(
                 summarize_verse, state, source_dir, translation_dir, glossary_dir,
-                model, dry_run,
+                spool_dir, model, dry_run,
             )
             return
 
@@ -664,18 +780,20 @@ def main():
 
             label_suffix = "" if code == "eng" else f" ({lang['label']})"
             subject = f"Tipitaka reading{label_suffix}: {filename} verses {verse_range} — {heading_str}"
-            send_email(
+            send_email_or_spool(
+                spool_dir,
                 os.environ["RESEND_API_KEY"],
                 os.environ["EMAIL_FROM"],
                 os.environ["EMAIL_TO"],
                 subject,
                 f"{header}\n{translations[code]}",
+                f"{filename} verses {verse_range} ({lang['label']})",
             )
 
         sec_header, summaries = None, {}
         if section_verses:
             sec_header, summaries = emit_section_summaries(
-                model, filename, section_verses, glossaries
+                model, filename, section_verses, glossaries, spool_dir
             )
 
         date_str = datetime.now(timezone.utc).date().isoformat()
@@ -703,6 +821,7 @@ def main():
         if not dry_run:
             try:
                 send_error_report(
+                    spool_dir,
                     os.environ["RESEND_API_KEY"],
                     os.environ["EMAIL_FROM"],
                     os.environ["EMAIL_TO"],
