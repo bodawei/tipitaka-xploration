@@ -44,9 +44,23 @@ A **verse** is a `<p rend="bodytext" n="N">` element plus any immediately
 following unnumbered `<p rend="bodytext">` continuation paragraphs. Verse
 numbers increase monotonically through a file with no resets.
 
+`N` is usually a single number, but where an abbreviated passage stands in for
+a run of elided verses it is a **range**, e.g. `n="225-240"`. Such a paragraph
+is one verse as far as the job is concerned — it is never split — but it counts
+for its whole span, and it is labelled by that range (`[225-240]`) in the Pali,
+the prompts, the archives and the email subjects. The translation prompt tells
+the model to echo a range back as given rather than expanding or renumbering
+it. Ranges are common in the Saṃyutta and Yamaka files and can be very large:
+`s0403m1.mul.xml` has a single paragraph numbered `308-1151`, 844 verses of
+about 450 characters.
+
 A **chunk** is up to `CHUNK_SIZE` consecutive verses (default 20) starting
 from the saved position, but it never crosses a section boundary — so it may
-contain fewer than `CHUNK_SIZE` verses. A chunk stops before a verse that:
+contain fewer than `CHUNK_SIZE` verses. The budget counts verse numbers rather
+than paragraphs, so a range counts for its span. Because a range is never
+split, adding one may take a chunk **over** `CHUNK_SIZE`; that is accepted, and
+the next chunk simply starts after the end of the range. A chunk stops before a
+verse that:
 
 - has a different immediate parent `<div>` (a chapter/kanda boundary), or
 - begins a new intra-chapter section — marked by a heading for the new section

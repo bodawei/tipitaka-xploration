@@ -93,6 +93,16 @@ LANGUAGES = [
     },
 ]
 
+# Appended to every language's translation prompt. A chunk may contain an
+# abbreviated passage whose number is a range (see parse_verse_number), and the
+# model must not try to tidy that away.
+VERSE_NUMBER_INSTRUCTION = (
+    "\n\nA verse number may be a range, like '[225-240]', where one abbreviated "
+    "passage stands in for a run of elided verses. Translate such a passage as "
+    "the single entry it is, and echo its number back exactly as given, range "
+    "and all — never split it into separate verses and never renumber it."
+)
+
 GLOSSARY_MARKER = "=== NEW GLOSSARY TERMS ==="
 
 # Appended to every language's system prompt so glossary behaviour is identical
@@ -160,6 +170,33 @@ def starts_new_section(elem):
     return False
 
 
+# A verse's n= is normally a single number, but an abbreviated passage that
+# stands in for a run of elided verses carries the whole range, e.g.
+# n="225-240". One such paragraph can cover hundreds of verse numbers while
+# being only a few lines of text.
+VERSE_RANGE_RE = re.compile(r"^(\d+)-(\d+)$")
+
+
+def parse_verse_number(raw):
+    """Parse an n= attribute into (first, last). A plain number gives first == last."""
+    raw = raw.strip()
+    if raw.isdigit():
+        n = int(raw)
+        return n, n
+    m = VERSE_RANGE_RE.match(raw)
+    if not m:
+        raise ValueError(f"Unrecognised verse number {raw!r}")
+    first, last = int(m.group(1)), int(m.group(2))
+    if last < first:
+        raise ValueError(f"Reversed verse range {raw!r}")
+    return first, last
+
+
+def verse_label(first, last):
+    """How a verse or span of verses is written in output: "12" or "225-240"."""
+    return str(first) if first == last else f"{first}-{last}"
+
+
 def heading_path(div_node, parent_map):
     chain = []
     node = div_node
@@ -190,8 +227,12 @@ def parse_verses(filepath):
         n = el.get("n")
         text = normalize(clean_text(el))
         if n is not None:
+            first, last = parse_verse_number(n)
             current = {
-                "n": int(n),
+                "n": first,
+                "n_last": last,
+                "span": last - first + 1,
+                "label": verse_label(first, last),
                 "parent": parent_map.get(el),
                 "texts": [text],
                 "section_start": section_pending,
@@ -214,22 +255,32 @@ def select_chunk(files, source_dir, state, chunk_size):
         filename = files[idx]
         verses = parse_verses(os.path.join(source_dir, filename))
 
-        start_i = next((i for i, v in enumerate(verses) if v["n"] >= next_verse), None)
+        # Match on n_last so a saved position that lands inside a range still
+        # resumes at the paragraph covering it rather than skipping past it.
+        start_i = next(
+            (i for i, v in enumerate(verses) if v["n_last"] >= next_verse), None
+        )
         if start_i is None:
             idx = (idx + 1) % len(files)
             next_verse = 1
             continue
 
+        # The budget counts verse numbers, not paragraphs, so a range counts for
+        # its whole span. A range is never split: if adding one overshoots
+        # CHUNK_SIZE the chunk simply runs long, and the next one picks up after
+        # the end of the range.
         chunk = [verses[start_i]]
+        span = verses[start_i]["span"]
         parent = verses[start_i]["parent"]
         i = start_i + 1
         while (
-            len(chunk) < chunk_size
+            span < chunk_size
             and i < len(verses)
             and verses[i]["parent"] is parent
             and not verses[i]["section_start"]
         ):
             chunk.append(verses[i])
+            span += verses[i]["span"]
             i += 1
 
         if i < len(verses):
@@ -270,7 +321,9 @@ def find_section(verses, verse_n):
     Used by the summary backfill (see SUMMARIZE_VERSE), to re-summarise a
     section whose boundary an earlier run failed to detect.
     """
-    at = next((i for i, v in enumerate(verses) if v["n"] == verse_n), None)
+    at = next(
+        (i for i, v in enumerate(verses) if v["n"] <= verse_n <= v["n_last"]), None
+    )
     if at is None:
         raise RuntimeError(f"Verse {verse_n} not found")
 
@@ -294,7 +347,7 @@ def find_section(verses, verse_n):
 
 
 def format_pali(chunk):
-    return "\n\n".join(f"[{v['n']}] {' '.join(v['texts'])}" for v in chunk)
+    return "\n\n".join(f"[{v['label']}] {' '.join(v['texts'])}" for v in chunk)
 
 
 def anthropic_message(api_key, model, system, user_msg, truncation_hint):
@@ -339,7 +392,8 @@ def call_anthropic(api_key, model, system, filename, heading, chunk, glossary=""
         f"Section: {heading_str}\n\n{format_pali(chunk)}"
     )
     return anthropic_message(
-        api_key, model, system + GLOSSARY_INSTRUCTION, user_msg,
+        api_key, model, system + VERSE_NUMBER_INSTRUCTION + GLOSSARY_INSTRUCTION,
+        user_msg,
         "Translation truncated: hit max_tokens output cap. "
         "Increase max_tokens or reduce CHUNK_SIZE.",
     )
@@ -608,11 +662,7 @@ def write_summary_files(translation_dir, date_str, run_n, header, summaries):
 def emit_section_summaries(model, filename, section_verses, glossaries, spool_dir):
     """Summarise a whole section into every language, email each, and return
     (header, {code: summary}) for archiving."""
-    sec_nums = [v["n"] for v in section_verses]
-    sec_range = (
-        str(sec_nums[0]) if len(sec_nums) == 1
-        else f"{sec_nums[0]}-{sec_nums[-1]}"
-    )
+    sec_range = verse_label(section_verses[0]["n"], section_verses[-1]["n_last"])
     sec_heading = section_verses[0]["heading"]
     sec_heading_str = " — ".join(sec_heading) if sec_heading else filename
     sec_header = (
@@ -676,10 +726,9 @@ def run_backfill_summary(spec, state, source_dir, translation_dir, glossary_dir,
 
     verses = parse_verses(os.path.join(source_dir, filename))
     section_verses = find_section(verses, verse_n)
-    sec_nums = [v["n"] for v in section_verses]
     print(
         f"Backfilling summary for {filename} section containing verse {verse_n}: "
-        f"verses {sec_nums[0]}-{sec_nums[-1]}"
+        f"verses {verse_label(section_verses[0]['n'], section_verses[-1]['n_last'])}"
     )
 
     if dry_run:
@@ -743,12 +792,7 @@ def main():
         filename, chunk, heading, new_state, section_verses = select_chunk(
             files, source_dir, state, chunk_size
         )
-        verse_numbers = [v["n"] for v in chunk]
-        verse_range = (
-            str(verse_numbers[0])
-            if len(verse_numbers) == 1
-            else f"{verse_numbers[0]}-{verse_numbers[-1]}"
-        )
+        verse_range = verse_label(chunk[0]["n"], chunk[-1]["n_last"])
         heading_str = " — ".join(heading) if heading else filename
         context = f"{filename} verses {verse_range}"
 

@@ -18,3 +18,7 @@ separate message; section summaries are likewise emailed per language.
 
 `runN` starts at `run1` for the first run on a given UTC date and increments for
 any additional runs that day (e.g. a manual re-run).
+
+Verse numbers in these files are usually single numbers, but an abbreviated
+passage standing in for a run of elided verses is labelled with its whole range
+(e.g. `[225-240]`) — one entry, not sixteen.
