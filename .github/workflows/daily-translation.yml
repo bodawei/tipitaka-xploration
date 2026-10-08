@@ -9,6 +9,10 @@ on:
         description: 'Number of verses to translate (overrides the CHUNK_SIZE repo variable)'
         required: false
         type: string
+      providers:
+        description: 'Space-separated providers to run (overrides the PROVIDERS repo variable), e.g. "claude kimi"'
+        required: false
+        type: string
       dry_run:
         description: 'Dry run: skip translation/email calls and just log the selected chunk'
         required: false
@@ -31,8 +35,11 @@ jobs:
       TRANSLATION_DIR: translation/results
       GLOSSARY_DIR: translation
       CHUNK_SIZE: ${{ inputs.chunk_size || vars.CHUNK_SIZE || '20' }}
+      PROVIDERS: ${{ inputs.providers || vars.PROVIDERS || 'claude kimi' }}
       ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || 'claude-sonnet-5' }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      KIMI_MODEL: ${{ vars.KIMI_MODEL || 'kimi-k2.6' }}
+      KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
       EMAIL_FROM: ${{ vars.EMAIL_FROM }}
