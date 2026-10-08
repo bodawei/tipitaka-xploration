@@ -1,40 +1,57 @@
 # Daily Tipitaka translation job
 
 A GitHub Actions job that works through the Pali canon a chunk at a time: each
-day it translates the next chunk of verses from the current file to English,
-emails the translation, archives the day's output, and advances its saved
-position for next time.
+day it translates the next chunk of verses from the current file, emails the
+translations, archives the day's output, and advances its saved position for
+next time.
+
+The job can run several **providers** (currently `claude` and `kimi`), each an
+independent large-language-model API. Every configured provider translates the
+same chunk on the same day without consulting the others, so their output can
+be compared side by side. Each provider keeps its own progress state,
+glossary, and result archive; emails are sent per provider with the provider
+tagged in the subject.
 
 ## Flow
 
-1. Load `translation/state/translation-progress.json` — `{"file": "<name>.mul.xml", "next_verse": N}`.
-2. Retry any emails an earlier run could not send (see "Undeliverable email"
+1. Resolve the provider list from `PROVIDERS` (default `claude kimi`).
+2. Load each provider's saved position —
+   `translation/state/translation-progress-<provider>.json`, each
+   `{"file": "<name>.mul.xml", "next_verse": N}`. When more than one provider
+   is configured the positions must agree (the providers run in lockstep), so
+   a disagreement aborts the run with an error rather than producing a
+   mismatched comparison.
+3. Retry any emails an earlier run could not send (see "Undeliverable email"
    below), before starting any work of this run's own.
-3. Parse that file (`romn/<name>.mul.xml`) and select the next chunk of verses
+4. Parse that file (`romn/<name>.mul.xml`) and select the next chunk of verses
    starting at `next_verse` (see "Verse and chunk model" below).
-4. For each target language, read its glossary
-   (`translation/glossary-<code>.md`, e.g. `glossary-eng.md`) and include it in
-   that language's Anthropic request, so key Pali terms are rendered the same way
-   as in earlier runs (see "Glossaries" below).
-5. Translate the chunk's Pali text into each target language via the Anthropic
-   API. Each response also reports any new key terms it introduced.
-6. Email each translation separately via the Resend API.
-7. If this chunk completed a section (see "Section summaries" below), gather the
-   whole just-finished section's Pali and email a condensed prose summary in each
-   target language.
-8. Write the archive files to `translation/results/` (Pali only, one per
-   target language, a combined record, and — when a section completed — a
-   `summary-<code>` file per language; see `translation/results/README.md`),
-   and append any newly-introduced key terms to each `translation/glossary-<code>.md`.
-9. Update `translation/state/translation-progress.json` to point at the verse after the
-   last one translated (or the start of the next file, if the chunk reached
-   the end of the current one).
-10. The GitHub Actions workflow commits and pushes the updated state, new archive
-    files, and any glossary additions back to the repo.
+5. For each provider and each target language, read that combination's
+   glossary (`translation/glossary-<provider>-<code>.md`, e.g.
+   `glossary-kimi-eng.md`) and include it in that request, so key Pali terms
+   are rendered the same way as in earlier runs (see "Glossaries" below).
+6. Translate the chunk's Pali text with every provider into each target
+   language. Each response also reports any new key terms it introduced. All
+   translations finish before any email goes out.
+7. Email each translation separately via the Resend API, tagged by provider:
+   `Tipitaka reading [claude]: …`, `Tipitaka reading [kimi] (Traditional
+   Chinese): …`, and so on.
+8. If this chunk completed a section (see "Section summaries" below), gather
+   the whole just-finished section's Pali and email a condensed prose summary
+   per provider per language.
+9. Write the archive files per provider under
+   `translation/results/<provider>/` (Pali only, one per target language, a
+   combined record, and — when a section completed — a `summary-<code>` file
+   per language; see `translation/results/README.md`), and append any
+   newly-introduced key terms to each provider's glossary files.
+10. Update every configured provider's state file to point at the verse after
+    the last one translated (or the start of the next file, if the chunk
+    reached the end of the current one).
+11. The GitHub Actions workflow commits and pushes the updated states, new
+    archive files, and any glossary additions back to the repo.
 
-Steps 4–9 are atomic: if anything fails partway, nothing from that run is
-kept — no partial archive files, no glossary additions, no state advance — so the
-same chunk is simply retried on the next run. Email delivery is the one
+Steps 5–10 are atomic: if anything fails partway, nothing from that run is
+kept — no partial archive files, no glossary additions, no state advance — so
+the same chunk is simply retried on the next run. Email delivery is the one
 exception: it is retried out of a spool rather than rolling the run back (see
 "Undeliverable email"). See "Error handling" below.
 
@@ -87,20 +104,50 @@ a circular list. Progress is seeded to start at `vin01m.mul.xml`, verse 1.
 When the alphabetically-last file is exhausted, the job wraps back around to
 the alphabetically-first file.
 
+## Providers
+
+A provider is one LLM API integration: `claude` (Anthropic Messages API) and
+`kimi` (Moonshot chat-completions API) are built in; the registry and dispatch
+live at the top of `translation/scripts/daily_translate.py`. Each provider
+carries its own API-key and model environment variables:
+
+- `claude` — `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (default `claude-sonnet-5`)
+- `kimi` — `KIMI_API_KEY`, `KIMI_MODEL` (default `kimi-k2.6`)
+
+`PROVIDERS` (whitespace-separated names) selects which run each day, in that
+order. All configured providers translate the **same** chunk, selected from
+their shared saved position, and the run succeeds only if every provider
+succeeded — so the providers advance in lockstep and a day's archives always
+line up for comparison.
+
+Running a subset (e.g. `PROVIDERS=claude` while Kimi is having an outage)
+is supported as an escape hatch: the configured providers' states advance and
+the others' do not. When you later re-enable the full set, the startup
+lockstep check will refuse to run until the positions agree again — finish the
+catch-up with single-provider runs, or edit the state files by hand.
+
 ## Glossaries
 
-Each target language keeps a running glossary of key Pali terms at
-`translation/glossary-<code>.md` — a Markdown table of `Pali | rendering | notes`
-rows. Its purpose is twofold: a human-readable guide to how doctrinally loaded
-terms are being translated, and a consistency anchor so the same Pali word is
-rendered the same way from one run to the next.
+Each provider-and-language combination keeps a running glossary of key Pali
+terms at `translation/glossary-<provider>-<code>.md` — a Markdown table of
+`Pali | rendering | notes` rows. Its purpose is twofold: a human-readable
+guide to how doctrinally loaded terms are being translated, and a consistency
+anchor so the same Pali word is rendered the same way from one run to the
+next.
 
-Each run injects the current glossary into that language's translation request.
-The model reuses the listed renderings and, after the verse translation, reports
-any key terms it introduced that are not yet in the glossary (doctrinal or
-technical terms only — never ordinary vocabulary or proper names). Those new
-terms are appended to the file on a successful run; entries are never rewritten
-or removed automatically. The files start empty and are created on first use.
+Each run injects the current glossary into that combination's translation
+request. The model reuses the listed renderings and, after the verse
+translation, reports any key terms it introduced that are not yet in the
+glossary (doctrinal or technical terms only — never ordinary vocabulary or
+proper names). Those new terms are appended to the file on a successful run;
+entries are never rewritten or removed automatically. The files start empty
+and are created on first use.
+
+The glossaries are per provider so the bake-off stays honest: each provider's
+word choices evolve from its own translation history, not from the other's.
+(Kimi's glossaries were seeded with a copy of Claude's at migration time, so
+established renderings start out shared; the lists diverge only as each
+provider adds terms of its own.)
 
 The directory is set by `GLOSSARY_DIR` (default `translation`).
 
@@ -108,18 +155,18 @@ The directory is set by `GLOSSARY_DIR` (default `translation`).
 
 A chunk never crosses a section boundary, so whenever a chunk ends exactly at
 one — an intra-chapter section break, a chapter/kanda `<div>` boundary, or the
-end of a file — that chunk has completed a whole section. When that happens, the
-job gathers the entire just-finished section's Pali (walking back to the
+end of a file — that chunk has completed a whole section. When that happens,
+the job gathers the entire just-finished section's Pali (walking back to the
 section's first verse, which may lie in an earlier run's chunk) and, for each
-target language, emails a single condensed **prose** summary: verse boundaries
-are flattened and the text is abridged to roughly one tenth its length (~90%
-reduction). The current glossary is supplied for term consistency, but summaries
-do not themselves add glossary entries.
+provider and target language, emails a single condensed **prose** summary:
+verse boundaries are flattened and the text is abridged to roughly one tenth
+its length (~90% reduction). The current glossary is supplied for term
+consistency, but summaries do not themselves add glossary entries.
 
-Each summary is emailed and also archived to
-`translation/results/summary-<code>-YYYY-MM-DD-runN.txt` (sharing the run's date
-and run number). On a chunk that stops mid-section (because it hit `CHUNK_SIZE`),
-no summary is produced.
+Each summary is emailed (subject tagged with the provider) and also archived
+to `translation/results/<provider>/summary-<code>-YYYY-MM-DD-runN.txt`
+(sharing the run's date and run number). On a chunk that stops mid-section
+(because it hit `CHUNK_SIZE`), no summary is produced.
 
 ### Backfilling a missed summary
 
@@ -127,9 +174,9 @@ If a section boundary went undetected, its summary was never sent and the job
 has since read past it. Setting `SUMMARIZE_VERSE` to a verse number (or
 `<file>.mul.xml:<verse>`) runs a summary-only pass over the whole section
 containing that verse: it emails and archives the summaries exactly as a normal
-run would, but translates nothing, adds no glossary terms, and leaves the saved
-position untouched. It is also exposed as the `summarize_verse` input on the
-manual `workflow_dispatch` run.
+run would — for every configured provider — but translates nothing, adds no
+glossary terms, and leaves the saved position untouched. It is also exposed as
+the `summarize_verse` input on the manual `workflow_dispatch` run.
 
 ## Undeliverable email
 
@@ -137,43 +184,47 @@ A failed send does **not** abort the run. The translation has already been made
 and archived, so rolling back would only re-translate and re-send the same
 chunk; instead the exact message is written to
 `translation/state/pending-email/email-<UTC timestamp>-<NNN>.json` — subject,
-body, the originating context, an attempt count and the last error. The
-recipient is deliberately not stored: it is a secret, and resolving it from the
-environment at send time means a retry honours its current value. Each spooled
-message is also logged as a GitHub Actions warning, so the run shows the problem
-without going red.
+body, the originating context (including the provider), an attempt count and
+the last error. The recipient is deliberately not stored: it is a secret, and
+resolving it from the environment at send time means a retry honours its
+current value. Each spooled message is also logged as a GitHub Actions
+warning, so the run shows the problem without going red.
 
 At the start of every run, before any parsing or translation, the spool is
 replayed oldest-first. A message that goes through is deleted; the first one
 that fails again has its attempt count and error updated and the replay stops
-there, leaving the rest queued in order for the next run rather than hammering a
-service that is still down.
+there, leaving the rest queued in order for the next run rather than hammering
+a service that is still down.
 
-This applies to every outbound message — the per-language readings, the section
-summaries, and the error reports themselves.
+This applies to every outbound message — the per-provider per-language
+readings, the section summaries, and the error reports themselves.
 
 Two things make the spool durable, since each Actions run starts from a fresh
 checkout and anything uncommitted is thrown away:
 
 - the workflow's commit step adds all of `translation/state/`, not just the
-  progress file, so spooled messages (and their later deletion) are committed;
+  progress files, so spooled messages (and their later deletion) are
+  committed;
 - that step runs with `if: !cancelled()`, so a spooled message still gets
   committed on a run that failed for some other reason.
 
 The spool directory is set by `EMAIL_SPOOL_DIR` (default
-`translation/state/pending-email`).
+`translation/state/pending-email`) and is shared by all providers.
 
 ## File and directory layout
 
 - `translation/scripts/daily_translate.py` — the job's entire logic (stdlib-only
   Python, no pip install required).
-- `translation/state/translation-progress.json` — current position (file + next verse).
+- `translation/state/translation-progress-<provider>.json` — per-provider
+  current position (file + next verse).
 - `translation/state/pending-email/` — emails that failed to send, awaiting
   retry (see "Undeliverable email"). Empty in the normal case.
-- `translation/results/` — daily archive output (`pali-`, `eng-`, `zh-`, `full-`
-  files per run; see `translation/results/README.md`).
-- `translation/glossary-<code>.md` — per-language key-term glossary (e.g.
-  `glossary-eng.md`, `glossary-zh.md`); see "Glossaries" below.
+- `translation/results/<provider>/` — per-provider daily archive output
+  (`pali-`, `eng-`, `zh-`, `full-` files per run; see
+  `translation/results/README.md`).
+- `translation/glossary-<provider>-<code>.md` — per-provider per-language
+  key-term glossary (e.g. `glossary-claude-eng.md`, `glossary-kimi-zh.md`);
+  see "Glossaries" above.
 - `.github/workflows/daily-translation.yml` — the scheduled workflow.
 
 ## Configuration
@@ -181,34 +232,42 @@ The spool directory is set by `EMAIL_SPOOL_DIR` (default
 Set these in the repo's Settings → Secrets and variables → Actions:
 
 **Secrets**
-- `ANTHROPIC_API_KEY` — used to call the Anthropic API for translation.
+- `ANTHROPIC_API_KEY` — used to call the Anthropic API for the `claude`
+  provider.
+- `KIMI_API_KEY` — used to call the Moonshot API for the `kimi` provider.
 - `RESEND_API_KEY` — used to send email via the Resend API.
-- `EMAIL_TO` — destination address for both the daily reading and any error reports.
+- `EMAIL_TO` — destination address for the daily readings and any error reports.
 
 **Variables**
 - `EMAIL_FROM` — sender address (must be on a domain verified in Resend).
 - `CHUNK_SIZE` (optional, default `20`) — verses per day.
+- `PROVIDERS` (optional, default `claude kimi`) — whitespace-separated
+  provider names to run each day; a subset is fine (see "Providers").
 - `ANTHROPIC_MODEL` (optional, default `claude-sonnet-5`).
+- `KIMI_MODEL` (optional, default `kimi-k2.6`).
 
 **Repo setting**: Settings → Actions → General → Workflow permissions must be
 set to "Read and write permissions" so the job's `GITHUB_TOKEN` can push its
 own commits.
 
 The workflow can also be run manually (`workflow_dispatch`) with an optional
-`chunk_size` override, a `dry_run` toggle that skips the Anthropic call,
-the email, the archive files, the glossary updates, and the state update — it
-only logs the selected chunk, for safe testing — and a `summarize_verse` input
-that backfills a missed section summary (see "Backfilling a missed summary").
+`chunk_size` override, a `providers` override, a `dry_run` toggle that skips
+the model calls, the emails, the archive files, the glossary updates, and the
+state updates — it only logs the selected chunk, for safe testing — and a
+`summarize_verse` input that backfills a missed section summary (see
+"Backfilling a missed summary").
 
 ## Error handling
 
-If translation, file-writing, or the state update fails at any
-point, the job sends a separate error-report email instead (subject
-`Tipitaka job ERROR — <context>`, containing the exception and a truncated
-traceback) and exits non-zero. If the error-report email itself can't be
-sent (e.g. broken email secrets), the report is spooled for retry like any
-other message, and the run still exits non-zero, so the failure is visible as
-a red run in the Actions tab even in that fallback case.
+If translation, file-writing, or the state update fails at any point, the job
+sends a separate error-report email instead (subject `Tipitaka job ERROR —
+<context>`, containing the exception and a truncated traceback) and exits
+non-zero. The context names the failing chunk and, once translation is under
+way, the provider and language (e.g. `vin01m.mul.xml verses 12-31 (kimi
+eng)`). If the error-report email itself can't be sent (e.g. broken email
+secrets), the report is spooled for retry like any other message, and the run
+still exits non-zero, so the failure is visible as a red run in the Actions
+tab even in that fallback case.
 
 A send failure on its own is not one of these errors: it is spooled and
 retried, and the run completes successfully.
@@ -217,11 +276,12 @@ retried, and the run completes successfully.
 
 - Dates and run numbering (`run1`, `run2`, ...) use UTC, matching the cron
   schedule.
-- Each run emails one message per target language (the verse-by-verse
-  translation), plus, when a section completes, one condensed prose summary per
-  language. The Pali text and the combined record are archived on disk in
-  `translation/results/` but not emailed; the per-language translations and
-  section summaries are both emailed and archived.
+- With both providers configured, each run emails one message per provider
+  per target language (the verse-by-verse translation), plus, when a section
+  completes, one condensed prose summary per provider per language — four
+  reading emails and up to four summary emails per day. The Pali text and the
+  combined record are archived on disk in `translation/results/<provider>/`
+  but not emailed.
 - File ordering is alphabetical across all `romn/*.mul.xml` files, not a
   curated canonical reading order — it starts at `vin01m.mul.xml` and wraps
   around after the last file.

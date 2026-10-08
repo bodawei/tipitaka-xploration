@@ -3,8 +3,12 @@
 Daily Tipitaka reading job.
 
 Reads the next chunk of verses from the current position in a rotating list of
-romn/*.mul.xml files, translates it to English via the Anthropic API, emails
-the result via Resend, and advances the on-disk progress state.
+romn/*.mul.xml files and translates it into each configured target language
+with every provider named in PROVIDERS (default: claude and kimi), so the
+providers can be compared side by side. The providers translate the same chunk
+without consulting each other and keep fully separate progress state,
+glossaries, and result archives. Each translation is emailed via Resend and
+the on-disk progress state is advanced.
 
 A "verse" is a <p rend="bodytext" n="N"> element plus any immediately
 following unnumbered <p rend="bodytext"> continuation paragraphs. A chunk
@@ -21,8 +25,31 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
-ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 RESEND_URL = "https://api.resend.com/emails"
+
+CLAUDE_URL = "https://api.anthropic.com/v1/messages"
+KIMI_URL = "https://api.moonshot.ai/v1/chat/completions"
+
+# Supported translation providers. Each names the environment variables that
+# carry its API key and model override, plus the model used when the override
+# is unset. The PROVIDERS environment variable (whitespace-separated names)
+# selects which run each day; together they translate the same chunk in
+# lockstep, keeping separate state, glossaries, and archives so their output
+# can be compared.
+PROVIDERS = {
+    "claude": {
+        "label": "Claude",
+        "key_env": "ANTHROPIC_API_KEY",
+        "model_env": "ANTHROPIC_MODEL",
+        "model_default": "claude-sonnet-5",
+    },
+    "kimi": {
+        "label": "Kimi",
+        "key_env": "KIMI_API_KEY",
+        "model_env": "KIMI_MODEL",
+        "model_default": "kimi-k2.6",
+    },
+}
 
 WHITESPACE_RE = re.compile(r"\s+")
 
@@ -361,7 +388,7 @@ def anthropic_message(api_key, model, system, user_msg, truncation_hint):
     ).encode("utf-8")
 
     req = urllib.request.Request(
-        ANTHROPIC_URL,
+        CLAUDE_URL,
         data=body,
         method="POST",
         headers={
@@ -379,19 +406,65 @@ def anthropic_message(api_key, model, system, user_msg, truncation_hint):
     return "".join(block["text"] for block in result["content"] if block["type"] == "text")
 
 
+def kimi_message(api_key, model, system, user_msg, truncation_hint):
+    """Call the Moonshot (Kimi) chat-completions API, which is OpenAI-compatible."""
+    body = json.dumps(
+        {
+            "model": model,
+            "max_completion_tokens": 16000,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_msg},
+            ],
+        }
+    ).encode("utf-8")
+
+    req = urllib.request.Request(
+        KIMI_URL,
+        data=body,
+        method="POST",
+        headers={
+            "content-type": "application/json",
+            "authorization": f"Bearer {api_key}",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=180) as resp:
+        result = json.loads(resp.read().decode("utf-8"))
+
+    choice = result["choices"][0]
+    if choice.get("finish_reason") == "length":
+        raise RuntimeError(truncation_hint)
+
+    content = choice["message"]["content"]
+    if isinstance(content, list):
+        return "".join(
+            part.get("text", "") for part in content if part.get("type") == "text"
+        )
+    return content
+
+
+def chat_message(provider, api_key, model, system, user_msg, truncation_hint):
+    if provider == "claude":
+        return anthropic_message(api_key, model, system, user_msg, truncation_hint)
+    if provider == "kimi":
+        return kimi_message(api_key, model, system, user_msg, truncation_hint)
+    raise ValueError(f"Unknown provider {provider!r}")
+
+
 def glossary_block(glossary):
     if not glossary.strip():
         return ""
     return f"Established glossary (reuse these renderings):\n{glossary}\n\n"
 
 
-def call_anthropic(api_key, model, system, filename, heading, chunk, glossary=""):
+def call_model(provider, api_key, model, system, filename, heading, chunk, glossary=""):
     heading_str = " — ".join(heading) if heading else "(untitled section)"
     user_msg = (
         f"{glossary_block(glossary)}Text: {filename}\n"
         f"Section: {heading_str}\n\n{format_pali(chunk)}"
     )
-    return anthropic_message(
+    return chat_message(
+        provider,
         api_key, model, system + VERSE_NUMBER_INSTRUCTION + GLOSSARY_INSTRUCTION,
         user_msg,
         "Translation truncated: hit max_tokens output cap. "
@@ -399,7 +472,7 @@ def call_anthropic(api_key, model, system, filename, heading, chunk, glossary=""
     )
 
 
-def summarize_section(api_key, model, system, filename, heading, section_verses, glossary=""):
+def summarize_section(provider, api_key, model, system, filename, heading, section_verses, glossary=""):
     """Condensed prose summary of a whole section (verse boundaries flattened)."""
     heading_str = " — ".join(heading) if heading else "(untitled section)"
     pali_prose = " ".join(" ".join(v["texts"]) for v in section_verses)
@@ -407,15 +480,16 @@ def summarize_section(api_key, model, system, filename, heading, section_verses,
         f"{glossary_block(glossary)}Text: {filename}\n"
         f"Section: {heading_str}\n\n{pali_prose}"
     )
-    return anthropic_message(
+    return chat_message(
+        provider,
         api_key, model, system, user_msg,
         "Section summary truncated: hit max_tokens output cap. "
         "The section may be too long to summarise in one call.",
     )
 
 
-def glossary_path(glossary_dir, code):
-    return os.path.join(glossary_dir, f"glossary-{code}.md")
+def glossary_path(glossary_dir, provider, code):
+    return os.path.join(glossary_dir, f"glossary-{provider}-{code}.md")
 
 
 def read_glossary(path):
@@ -659,9 +733,10 @@ def write_summary_files(translation_dir, date_str, run_n, header, summaries):
             f.write(f"{header}\n{summary}\n")
 
 
-def emit_section_summaries(model, filename, section_verses, glossaries, spool_dir):
-    """Summarise a whole section into every language, email each, and return
-    (header, {code: summary}) for archiving."""
+def emit_section_summaries(active, filename, section_verses, glossaries, spool_dir):
+    """Summarise a whole section with every provider into every language, email
+    each summary separately, and return (header, {provider: {code: summary}})
+    for archiving."""
     sec_range = verse_label(section_verses[0]["n"], section_verses[-1]["n_last"])
     sec_heading = section_verses[0]["heading"]
     sec_heading_str = " — ".join(sec_heading) if sec_heading else filename
@@ -672,27 +747,31 @@ def emit_section_summaries(model, filename, section_verses, glossaries, spool_di
 
     print(f"Section complete ({filename} verses {sec_range}); emailing condensed summaries")
     summaries = {}
-    for lang in LANGUAGES:
-        code = lang["code"]
-        print(f"Summarising section into {lang['label']}...")
-        summaries[code] = summarize_section(
-            os.environ["ANTHROPIC_API_KEY"], model, lang["summary_system"],
-            filename, sec_heading, section_verses, glossary=glossaries[code][0],
-        )
-        label_suffix = "" if code == "eng" else f" ({lang['label']})"
-        subject = (
-            f"Tipitaka section summary{label_suffix}: "
-            f"{filename} verses {sec_range} — {sec_heading_str}"
-        )
-        send_email_or_spool(
-            spool_dir,
-            os.environ["RESEND_API_KEY"],
-            os.environ["EMAIL_FROM"],
-            os.environ["EMAIL_TO"],
-            subject,
-            f"{sec_header}\n{summaries[code]}",
-            f"{filename} section summary {sec_range} ({lang['label']})",
-        )
+    for p in active:
+        name = p["name"]
+        summaries[name] = {}
+        for lang in LANGUAGES:
+            code = lang["code"]
+            print(f"Summarising section into {lang['label']} ({name})...")
+            summaries[name][code] = summarize_section(
+                name, p["key"], p["model"], lang["summary_system"],
+                filename, sec_heading, section_verses,
+                glossary=glossaries[(name, code)][0],
+            )
+            label_suffix = "" if code == "eng" else f" ({lang['label']})"
+            subject = (
+                f"Tipitaka section summary [{name}]{label_suffix}: "
+                f"{filename} verses {sec_range} — {sec_heading_str}"
+            )
+            send_email_or_spool(
+                spool_dir,
+                os.environ["RESEND_API_KEY"],
+                os.environ["EMAIL_FROM"],
+                os.environ["EMAIL_TO"],
+                subject,
+                f"{sec_header}\n{summaries[name][code]}",
+                f"{filename} section summary {sec_range} [{name}] ({lang['label']})",
+            )
     return sec_header, summaries
 
 
@@ -710,8 +789,50 @@ def send_error_report(spool_dir, api_key, email_from, email_to, context, exc):
     )
 
 
-def run_backfill_summary(spec, state, source_dir, translation_dir, glossary_dir,
-                         spool_dir, model, dry_run):
+def load_active_providers():
+    """Resolve the PROVIDERS environment variable (whitespace-separated names)
+    into an ordered list of {"name", "label", "model", "key"} dicts, rejecting
+    unknown names, duplicates, and missing API keys."""
+    spec = os.environ.get("PROVIDERS", " ".join(PROVIDERS))
+    names = spec.split()
+    if not names:
+        raise RuntimeError("PROVIDERS is empty; set it to one or more of: "
+                           + ", ".join(sorted(PROVIDERS)))
+    active = []
+    seen = set()
+    for name in names:
+        if name not in PROVIDERS:
+            raise RuntimeError(
+                f"Unknown provider {name!r} in PROVIDERS; "
+                f"expected one of: {', '.join(sorted(PROVIDERS))}"
+            )
+        if name in seen:
+            raise RuntimeError(f"Duplicate provider {name!r} in PROVIDERS")
+        seen.add(name)
+        cfg = PROVIDERS[name]
+        key = os.environ.get(cfg["key_env"])
+        if not key:
+            raise RuntimeError(
+                f"Environment variable {cfg['key_env']} is not set "
+                f"(required for provider {name!r})"
+            )
+        active.append({
+            "name": name,
+            "label": cfg["label"],
+            "model": os.environ.get(cfg["model_env"], cfg["model_default"]),
+            "key": key,
+        })
+    return active
+
+
+def state_path_for(state_base, provider):
+    """Per-provider progress state path derived from the STATE_FILE base."""
+    root, ext = os.path.splitext(state_base)
+    return f"{root}-{provider}{ext}"
+
+
+def run_backfill_summary(active, spec, state, source_dir, translation_dir, glossary_dir,
+                         spool_dir, dry_run):
     """Re-issue the section summary for the section containing a given verse.
 
     Set SUMMARIZE_VERSE to "<verse>" (in the file the state currently points
@@ -736,38 +857,63 @@ def run_backfill_summary(spec, state, source_dir, translation_dir, glossary_dir,
         return
 
     glossaries = {
-        lang["code"]: read_glossary(glossary_path(glossary_dir, lang["code"]))
-        for lang in LANGUAGES
+        (p["name"], lang["code"]): read_glossary(
+            glossary_path(glossary_dir, p["name"], lang["code"])
+        )
+        for p in active for lang in LANGUAGES
     }
     sec_header, summaries = emit_section_summaries(
-        model, filename, section_verses, glossaries, spool_dir
+        active, filename, section_verses, glossaries, spool_dir
     )
 
     date_str = datetime.now(timezone.utc).date().isoformat()
-    run_n = next_run_number(translation_dir, date_str)
-    write_summary_files(translation_dir, date_str, run_n, sec_header, summaries)
+    for p in active:
+        out_dir = os.path.join(translation_dir, p["name"])
+        run_n = next_run_number(out_dir, date_str)
+        write_summary_files(out_dir, date_str, run_n, sec_header, summaries[p["name"]])
     print("Backfill complete; state left unchanged")
 
 
 def main():
     source_dir = os.environ.get("SOURCE_DIR", "romn")
-    state_path = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
+    state_base = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
     translation_dir = os.environ.get("TRANSLATION_DIR", "translation/results")
     glossary_dir = os.environ.get("GLOSSARY_DIR", "translation")
     spool_dir = os.environ.get("EMAIL_SPOOL_DIR", "translation/state/pending-email")
     chunk_size = int(os.environ.get("CHUNK_SIZE", "15"))
-    model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
     dry_run = os.environ.get("DRY_RUN") == "1"
     summarize_verse = os.environ.get("SUMMARIZE_VERSE", "").strip()
 
     context = "startup"
     try:
+        active = load_active_providers()
+
         files = sorted(f for f in os.listdir(source_dir) if f.endswith(".mul.xml"))
         if not files:
             raise RuntimeError(f"No *.mul.xml files found in {source_dir}")
 
-        with open(state_path, encoding="utf-8") as f:
-            state = json.load(f)
+        states = {}
+        for p in active:
+            path = state_path_for(state_base, p["name"])
+            context = f"loading saved position ({p['name']})"
+            with open(path, encoding="utf-8") as f:
+                states[p["name"]] = json.load(f)
+
+        # Providers translate the same chunk in lockstep, so their saved
+        # positions must agree. Divergence means an earlier run used a
+        # provider subset and the two streams are out of sync — refuse to
+        # produce a mismatched side-by-side comparison.
+        state = states[active[0]["name"]]
+        if len(active) > 1:
+            for p in active[1:]:
+                if states[p["name"]] != state:
+                    raise RuntimeError(
+                        f"Saved positions disagree between providers: "
+                        f"{active[0]['name']} at {state}, "
+                        f"{p['name']} at {states[p['name']]} "
+                        f"({state_path_for(state_base, p['name'])}). Run a single "
+                        f"provider until they agree, or fix the state files."
+                    )
         context = f"file={state.get('file')}, next_verse={state.get('next_verse')}"
 
         # Retry anything an earlier run could not send, before doing any work
@@ -784,8 +930,8 @@ def main():
 
         if summarize_verse:
             run_backfill_summary(
-                summarize_verse, state, source_dir, translation_dir, glossary_dir,
-                spool_dir, model, dry_run,
+                active, summarize_verse, state, source_dir, translation_dir,
+                glossary_dir, spool_dir, dry_run,
             )
             return
 
@@ -807,55 +953,87 @@ def main():
             return
 
         glossaries = {
-            lang["code"]: read_glossary(glossary_path(glossary_dir, lang["code"]))
-            for lang in LANGUAGES
+            (p["name"], lang["code"]): read_glossary(
+                glossary_path(glossary_dir, p["name"], lang["code"])
+            )
+            for p in active for lang in LANGUAGES
         }
 
+        # Translate with every provider and language before any email goes
+        # out: a failure anywhere below means no emails, no archive, no
+        # glossary additions, and no state advance — the whole chunk simply
+        # retries on the next run.
         translations = {}
         new_terms = {}
-        for lang in LANGUAGES:
-            code = lang["code"]
-            print(f"Translating to {lang['label']}...")
-            response = call_anthropic(
-                os.environ["ANTHROPIC_API_KEY"], model, lang["system"], filename,
-                heading, chunk, glossary=glossaries[code][0],
-            )
-            translations[code], new_terms[code] = split_translation_and_terms(response)
+        for p in active:
+            name = p["name"]
+            translations[name] = {}
+            new_terms[name] = {}
+            for lang in LANGUAGES:
+                code = lang["code"]
+                context = f"{filename} verses {verse_range} ({name} {code})"
+                print(f"Translating to {lang['label']} ({name})...")
+                response = call_model(
+                    name, p["key"], p["model"], lang["system"], filename,
+                    heading, chunk, glossary=glossaries[(name, code)][0],
+                )
+                (
+                    translations[name][code],
+                    new_terms[name][code],
+                ) = split_translation_and_terms(response)
+        context = f"{filename} verses {verse_range}"
 
-            label_suffix = "" if code == "eng" else f" ({lang['label']})"
-            subject = f"Tipitaka reading{label_suffix}: {filename} verses {verse_range} — {heading_str}"
-            send_email_or_spool(
-                spool_dir,
-                os.environ["RESEND_API_KEY"],
-                os.environ["EMAIL_FROM"],
-                os.environ["EMAIL_TO"],
-                subject,
-                f"{header}\n{translations[code]}",
-                f"{filename} verses {verse_range} ({lang['label']})",
-            )
+        # Every translation succeeded — now send the emails.
+        for p in active:
+            name = p["name"]
+            for lang in LANGUAGES:
+                code = lang["code"]
+                label_suffix = "" if code == "eng" else f" ({lang['label']})"
+                subject = (
+                    f"Tipitaka reading [{name}]{label_suffix}: "
+                    f"{filename} verses {verse_range} — {heading_str}"
+                )
+                send_email_or_spool(
+                    spool_dir,
+                    os.environ["RESEND_API_KEY"],
+                    os.environ["EMAIL_FROM"],
+                    os.environ["EMAIL_TO"],
+                    subject,
+                    f"{header}\n{translations[name][code]}",
+                    f"{filename} verses {verse_range} [{name}] ({lang['label']})",
+                )
 
-        sec_header, summaries = None, {}
+        summaries = {}
+        sec_header = None
         if section_verses:
+            context = f"{filename} verses {verse_range} (section summaries)"
             sec_header, summaries = emit_section_summaries(
-                model, filename, section_verses, glossaries, spool_dir
+                active, filename, section_verses, glossaries, spool_dir
             )
+            context = f"{filename} verses {verse_range}"
 
         date_str = datetime.now(timezone.utc).date().isoformat()
-        run_n = next_run_number(translation_dir, date_str)
-        write_translation_files(translation_dir, date_str, run_n, header, translations, pali_text)
-        if summaries:
-            write_summary_files(translation_dir, date_str, run_n, sec_header, summaries)
-
-        for lang in LANGUAGES:
-            code = lang["code"]
-            append_glossary(
-                glossary_path(glossary_dir, code), lang["label"],
-                new_terms[code], glossaries[code][1],
+        for p in active:
+            out_dir = os.path.join(translation_dir, p["name"])
+            run_n = next_run_number(out_dir, date_str)
+            write_translation_files(
+                out_dir, date_str, run_n, header, translations[p["name"]], pali_text
             )
+            if summaries:
+                write_summary_files(out_dir, date_str, run_n, sec_header, summaries[p["name"]])
 
-        with open(state_path, "w", encoding="utf-8") as f:
-            json.dump(new_state, f, indent=2)
-            f.write("\n")
+        for p in active:
+            for lang in LANGUAGES:
+                code = lang["code"]
+                append_glossary(
+                    glossary_path(glossary_dir, p["name"], code), lang["label"],
+                    new_terms[p["name"]][code], glossaries[(p["name"], code)][1],
+                )
+
+        for p in active:
+            with open(state_path_for(state_base, p["name"]), "w", encoding="utf-8") as f:
+                json.dump(new_state, f, indent=2)
+                f.write("\n")
 
         print(f"State updated: {new_state}")
 
