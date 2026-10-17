@@ -2,7 +2,7 @@ name: Daily Tipitaka Translation
 
 on:
   schedule:
-    - cron: '0 13 * * *'
+#    - cron: '0 13 * * *'
   workflow_dispatch:
     inputs:
       chunk_size:
@@ -53,8 +53,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run daily translation
-        run: python translation/scripts/daily_translate.py
+#      - name: Run daily translation
+#        run: python translation/scripts/daily_translate.py
 
       # Runs even when the translation step failed, so that an email spooled
       # for retry (translation/state/pending-email/) survives to the next run —
