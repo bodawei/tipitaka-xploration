@@ -2,10 +2,11 @@
 
 Populated by the daily translation job (see `.github/workflows/daily-translation.yml`
 and `translation/scripts/daily_translate.py`). Archives live in per-provider
-subdirectories (`claude/`, `kimi/`, …) so the providers' output can be compared
-side by side; each configured provider gets its own complete copy of every run's
-files. Each successful run writes several files, named by UTC date and a per-day
-run counter:
+subdirectories (`claude/`, `kimi/`, `deepseek/`, …) so the providers' output
+can be compared side by side; each enabled provider gets its own complete copy
+of every run's files. Providers are switched on and off with the booleans in
+`translation/state/providers.json`. Each successful run writes several files,
+named by UTC date and a per-day run counter:
 
 - `pali-YYYY-MM-DD-runN.txt` — the original Pali text of that day's chunk.
 - `eng-YYYY-MM-DD-runN.txt` — the English translation only (matches the emailed content).
@@ -16,7 +17,7 @@ run counter:
   per target language (matches the emailed summary). Covers the entire section,
   which may span several days' chunks — not just that run's chunk.
 
-All configured providers translate the same Pali chunk each run (see "Providers"
+All enabled providers translate the same Pali chunk each run (see "Providers"
 in `translation/documentation/daily-translation-job.md`); each target language is
 translated per provider and emailed as its own separate message with the provider
 tagged in the subject; section summaries are likewise emailed per provider per

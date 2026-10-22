@@ -5,20 +5,24 @@ day it translates the next chunk of verses from the current file, emails the
 translations, archives the day's output, and advances its saved position for
 next time.
 
-The job can run several **providers** (currently `claude` and `kimi`), each an
-independent large-language-model API. Every configured provider translates the
-same chunk on the same day without consulting the others, so their output can
-be compared side by side. Each provider keeps its own progress state,
-glossary, and result archive; emails are sent per provider with the provider
-tagged in the subject.
+The job can run several **providers** (currently `claude`, `kimi`, and
+`deepseek`), each an independent large-language-model API. Every enabled
+provider translates the same chunk on the same day without consulting the
+others, so their output can be compared side by side. Each provider keeps its
+own progress state, glossary, and result archive; emails are sent per provider
+with the provider tagged in the subject.
 
 ## Flow
 
-1. Resolve the provider list from `PROVIDERS` (default `claude kimi`).
-2. Load each provider's saved position —
+1. Read the provider on/off booleans from
+   `translation/state/providers.json` (see "Providers" below). If every
+   provider is switched off, stop here without translating, emailing, or
+   updating anything. An optional `PROVIDERS` run override can narrow the
+   enabled set further.
+2. Load each enabled provider's saved position —
    `translation/state/translation-progress-<provider>.json`, each
    `{"file": "<name>.mul.xml", "next_verse": N}`. When more than one provider
-   is configured the positions must agree (the providers run in lockstep), so
+   is enabled the positions must agree (the providers run in lockstep), so
    a disagreement aborts the run with an error rather than producing a
    mismatched comparison.
 3. Retry any emails an earlier run could not send (see "Undeliverable email"
@@ -43,7 +47,7 @@ tagged in the subject.
    combined record, and — when a section completed — a `summary-<code>` file
    per language; see `translation/results/README.md`), and append any
    newly-introduced key terms to each provider's glossary files.
-10. Update every configured provider's state file to point at the verse after
+10. Update every enabled provider's state file to point at the verse after
     the last one translated (or the start of the next file, if the chunk
     reached the end of the current one).
 11. The GitHub Actions workflow commits and pushes the updated states, new
@@ -106,25 +110,52 @@ the alphabetically-first file.
 
 ## Providers
 
-A provider is one LLM API integration: `claude` (Anthropic Messages API) and
-`kimi` (Moonshot chat-completions API) are built in; the registry and dispatch
-live at the top of `translation/scripts/daily_translate.py`. Each provider
-carries its own API-key and model environment variables:
+A provider is one LLM API integration: `claude` (Anthropic Messages API),
+`kimi` (Moonshot chat-completions API), and `deepseek` (DeepSeek
+chat-completions API) are built in; the registry and dispatch live at the top
+of `translation/scripts/daily_translate.py`. Each provider carries its own
+API-key and model environment variables:
 
 - `claude` — `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (default `claude-sonnet-5`)
 - `kimi` — `KIMI_API_KEY`, `KIMI_MODEL` (default `kimi-k2.6`)
+- `deepseek` — `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL` (default `deepseek-flash`)
 
-`PROVIDERS` (whitespace-separated names) selects which run each day, in that
-order. All configured providers translate the **same** chunk, selected from
-their shared saved position, and the run succeeds only if every provider
-succeeded — so the providers advance in lockstep and a day's archives always
-line up for comparison.
+### Turning providers on and off
 
-Running a subset (e.g. `PROVIDERS=claude` while Kimi is having an outage)
-is supported as an escape hatch: the configured providers' states advance and
-the others' do not. When you later re-enable the full set, the startup
-lockstep check will refuse to run until the positions agree again — finish the
-catch-up with single-provider runs, or edit the state files by hand.
+`translation/state/providers.json` holds one boolean per provider. Edit it to
+switch providers on or off; the file is committed by the workflow like the
+progress states, so a change takes effect on the next run without touching
+repository variables or secrets:
+
+```json
+{
+  "claude": true,
+  "kimi": true,
+  "deepseek": true
+}
+```
+
+Only providers set to `true` run. A provider absent from the file is treated
+as off, and an unknown name is rejected so a typo cannot silently disable the
+job. If every provider is `false`, the script logs that everything is
+disabled and exits successfully without translating, emailing, retrying the
+mail spool, or changing any state or archive. The file is set by
+`PROVIDERS_FILE` (default `translation/state/providers.json`).
+
+The optional `PROVIDERS` environment variable (whitespace-separated names, set
+by the `providers` input on a manual run) narrows the enabled set for that run
+only. It cannot switch on a provider that is `false` in `providers.json`.
+
+All enabled providers translate the **same** chunk, selected from their
+shared saved position, and the run succeeds only if every provider succeeded —
+so the providers advance in lockstep and a day's archives always line up for
+comparison.
+
+Pausing a provider (e.g. while it is having an outage) advances only the
+remaining providers' states. When you later re-enable the paused provider, the
+startup lockstep check will refuse to run until the positions agree again —
+finish the catch-up with single-provider runs, or edit the state files by
+hand.
 
 ## Glossaries
 
@@ -145,9 +176,9 @@ and are created on first use.
 
 The glossaries are per provider so the bake-off stays honest: each provider's
 word choices evolve from its own translation history, not from the other's.
-(Kimi's glossaries were seeded with a copy of Claude's at migration time, so
-established renderings start out shared; the lists diverge only as each
-provider adds terms of its own.)
+(Kimi's and DeepSeek's glossaries were seeded with a copy of Claude's when each
+provider was added, so established renderings start out shared; the lists
+diverge only as each provider adds terms of its own.)
 
 The directory is set by `GLOSSARY_DIR` (default `translation`).
 
@@ -174,7 +205,7 @@ If a section boundary went undetected, its summary was never sent and the job
 has since read past it. Setting `SUMMARIZE_VERSE` to a verse number (or
 `<file>.mul.xml:<verse>`) runs a summary-only pass over the whole section
 containing that verse: it emails and archives the summaries exactly as a normal
-run would — for every configured provider — but translates nothing, adds no
+run would — for every enabled provider — but translates nothing, adds no
 glossary terms, and leaves the saved position untouched. It is also exposed as
 the `summarize_verse` input on the manual `workflow_dispatch` run.
 
@@ -215,6 +246,8 @@ The spool directory is set by `EMAIL_SPOOL_DIR` (default
 
 - `translation/scripts/daily_translate.py` — the job's entire logic (stdlib-only
   Python, no pip install required).
+- `translation/state/providers.json` — one on/off boolean per provider; the
+  normal way to enable or disable a provider (see "Providers" above).
 - `translation/state/translation-progress-<provider>.json` — per-provider
   current position (file + next verse).
 - `translation/state/pending-email/` — emails that failed to send, awaiting
@@ -235,27 +268,33 @@ Set these in the repo's Settings → Secrets and variables → Actions:
 - `ANTHROPIC_API_KEY` — used to call the Anthropic API for the `claude`
   provider.
 - `KIMI_API_KEY` — used to call the Moonshot API for the `kimi` provider.
+- `DEEPSEEK_API_KEY` — used to call the DeepSeek API for the `deepseek`
+  provider.
 - `RESEND_API_KEY` — used to send email via the Resend API.
 - `EMAIL_TO` — destination address for the daily readings and any error reports.
 
 **Variables**
 - `EMAIL_FROM` — sender address (must be on a domain verified in Resend).
 - `CHUNK_SIZE` (optional, default `20`) — verses per day.
-- `PROVIDERS` (optional, default `claude kimi`) — whitespace-separated
-  provider names to run each day; a subset is fine (see "Providers").
 - `ANTHROPIC_MODEL` (optional, default `claude-sonnet-5`).
 - `KIMI_MODEL` (optional, default `kimi-k2.6`).
+- `DEEPSEEK_MODEL` (optional, default `deepseek-flash`).
+
+Provider enablement is not a repository variable: edit the booleans in
+`translation/state/providers.json`. The `PROVIDERS` environment variable is
+only set by the manual-run `providers` input, as an optional per-run subset of
+the enabled providers (see "Providers").
 
 **Repo setting**: Settings → Actions → General → Workflow permissions must be
 set to "Read and write permissions" so the job's `GITHUB_TOKEN` can push its
 own commits.
 
 The workflow can also be run manually (`workflow_dispatch`) with an optional
-`chunk_size` override, a `providers` override, a `dry_run` toggle that skips
-the model calls, the emails, the archive files, the glossary updates, and the
-state updates — it only logs the selected chunk, for safe testing — and a
-`summarize_verse` input that backfills a missed section summary (see
-"Backfilling a missed summary").
+`chunk_size` override, a `providers` input that narrows the enabled set for
+that run, a `dry_run` toggle that skips the model calls, the emails, the
+archive files, the glossary updates, and the state updates — it only logs the
+selected chunk, for safe testing — and a `summarize_verse` input that backfills
+a missed section summary (see "Backfilling a missed summary").
 
 ## Error handling
 
@@ -276,10 +315,10 @@ retried, and the run completes successfully.
 
 - Dates and run numbering (`run1`, `run2`, ...) use UTC, matching the cron
   schedule.
-- With both providers configured, each run emails one message per provider
+- With all three providers enabled, each run emails one message per provider
   per target language (the verse-by-verse translation), plus, when a section
-  completes, one condensed prose summary per provider per language — four
-  reading emails and up to four summary emails per day. The Pali text and the
+  completes, one condensed prose summary per provider per language — six
+  reading emails and up to six summary emails per day. The Pali text and the
   combined record are archived on disk in `translation/results/<provider>/`
   but not emailed.
 - File ordering is alphabetical across all `romn/*.mul.xml` files, not a
