@@ -1,0 +1,137 @@
+# English glossary
+
+Key Pali terms and their established renderings, accumulated by the
+daily translation job to keep word choices consistent across runs.
+Managed automatically — new terms are appended as they first appear.
+
+| Pali | English | Notes |
+| --- | --- | --- |
+| pārājika | offence entailing defeat | the gravest class of offence, entailing permanent expulsion from the Sangha |
+| thullaccaya | grave offence | a serious offence, next in gravity below pārājika and saṅghādisesa |
+| anāpatti | there is no offence | formula declaring exemption from an offence |
+| sādiyati | consents to | to acquiesce in, take pleasure in (a physical contact) |
+| aṅgajāta | genital organ | lit. "born of the body", the male or female sexual organ |
+| vaccamagga | anus | lit. "excrement-passage" |
+| passāvamagga | vagina | lit. "urine-passage" |
+| paṇḍaka | paṇḍaka | a sexually deficient or non-normative male, ineligible for ordination |
+| ubhatobyañjanaka | hermaphrodite | one possessing the characteristics of both sexes |
+| santhata | covered | clothed or wrapped, opposed to asanthata, "uncovered" |
+| nāsetabba | to be expelled | to be made to leave the monastic community |
+| khittacitta | deranged in mind | mentally unhinged, one of the standard exemptions |
+| vedanāṭṭa | overwhelmed by pain | afflicted by feeling, a standard exemption |
+| ādikammika | the first offender | the one whose deed occasioned the laying down of the rule |
+| methunaṃ dhammaṃ paṭisevati | engages in sexual intercourse | lit. "practises the coupling act" |
+| saṅghādisesa | saṅghādisesa offence | class of offence requiring formal action by the Sangha, next below pārājika |
+| dukkaṭa | offence of wrong-doing | minor offence of improper conduct |
+| kukkucca | remorse | anxious scruple about having transgressed |
+| moghapurisa | foolish man | term of rebuke for an erring bhikkhu |
+| nimitta | private part | the sexual organ, esp. of an image or corpse |
+| sikkhaṃ paccakkhāti | renounces the training | formally disavows the monastic training |
+| vibbhamati | leaves the Order | returns to lay life |
+| sādhāraṇa | shared in common | of rules applying alike to bhikkhus and bhikkhunīs |
+| upasampadā | ordination | full admission to the Sangha |
+| upajjhā | preceptor | the teacher under whom one is ordained |
+| adinnādāna | taking what is not given | theft; the second of the pārājika offences for bhikkhus |
+| theyyasaṅkhāta | by way of theft | with thievish intent, the mental factor qualifying theft |
+| pāda | pāda | a unit of currency, reckoned at five māsakas |
+| māsaka | māsaka | a small coin; five make a pāda |
+| ṭhānā cāveti | shifts it from its place | the decisive act completing the theft |
+| asaṃvāsa | not in communion | excluded from the communal acts and recitation of the Saṅgha |
+| saṃvāsa | communion | a single formal act, a single recitation, an equal training |
+| gāmūpacāra | village precincts | the area around a village measured by a clod's throw |
+| saṅketaṃ vītināmeti | lets pass a marked spot | carrying stolen goods beyond an agreed boundary mark |
+| sikkhāpada | training rule | a rule of the monastic code |
+| theyyacitta | with thievish mind | the intention to steal accompanying the act |
+| bhūmaṭṭha | resting on the ground | goods lying on or buried in the earth |
+| thalaṭṭha | resting on a surface | goods set down on raised or dry ground |
+| ākāsaṭṭha | standing in the open air | goods unsupported, e.g. growing plants, airborne things |
+| vehāsaṭṭha | suspended aloft | goods hung up on a peg, line, pole, etc. |
+| abhiyuñjati | lays claim to | asserts legal ownership over another's property |
+| dhuraṃ nikkhipati | gives up his claim | abandons the burden of ownership or effort |
+| dhammaṃ carati | goes to law | pursues a lawsuit, litigates |
+| payoga | act | an act or effort of exertion in committing an offence |
+| araññaṭṭha | resting in the jungle | goods deposited in forest land possessed by people |
+| vanappati | forest tree | a tree owned and used by human beings |
+| haraṇaka | portable property | another's goods capable of being carried off |
+| upanidhi | goods on deposit | property entrusted to another's keeping |
+| suṅkaghāta | toll barrier | a royal customs post where duty is levied |
+| rājagga | liable to the king's duty | goods on which the king's toll is due |
+| dantapoṇa | tooth-wood | a stick used for cleaning the teeth |
+| mariyādā | embankment | the dyke retaining water in a pond or field |
+| apada | footless creatures | animals without feet, e.g. snakes and fish |
+| ocaraka | scout | one who spies out goods for another to steal |
+| oṇirakkha | warehouse-guard | one who guards goods that have been brought in |
+| saṃvidāvahāra | theft by arrangement | theft committed by several acting in concert |
+| saṅketakamma | making an appointed sign | fixing a prearranged time or signal for a theft |
+| nimittakamma | making a signal | a bodily sign given as the cue for a theft |
+| mūlaṭṭha | the original instigator | the one who first gave the command to steal |
+| parapariggahita | owned by another | belonging to someone else, a condition of theft |
+| vissāsaggāha | taking on trust | taking another's goods on the basis of familiarity |
+| tāvakālika | temporary borrowing | taking something for the time being, intending to return it |
+| parikkhāra | article | a requisite or item of property |
+| sakasaññī | perceives it as his own | mistaken perception that the property belongs to oneself |
+| paṃsukūlasaññī | perceives it as a rag from a dust-heap | thinking the item is discarded refuse-cloth, hence ownerless |
+| petapariggaha | owned by a departed spirit | property belonging to a peta, not a human owner |
+| tiracchānagatapariggaha | owned by an animal | property belonging to an animal, not a human owner |
+| niruttipatha | a manner of speaking | mere figure of speech, not meant literally; a standard exemption |
+| sampajānamusāvāda | deliberate lying | conscious speaking of falsehood |
+| pācittiya | offence of expiation | class of offence requiring confession |
+| paṃsukūla | rag from a dust-heap | discarded cloth taken as robe-material |
+| vighāsa | leavings of a kill | remnants of prey left by a beast of prey |
+| paṭivisa | portion | an individual share of food distributed among the Saṅgha |
+| suṅkaṭṭhāna | toll-station | the place where the king's customs duty is collected |
+| asubhabhāvanā | development of the perception of the unattractive | meditation on the foulness of the body |
+| asubhasamāpatti | attainment based on the unattractive | meditative attainment grounded in contemplation of foulness |
+| manussaviggaha | human being | lit. "human form", the object of the third pārājika |
+| satthahāraka | knife-bringer | one who brings a weapon, i.e. an assassin |
+| maraṇavaṇṇaṃ saṃvaṇṇeti | praises the beauty of death | speaking in praise of dying so as to induce death |
+| ānāpānassatisamādhi | concentration through mindfulness of breathing | meditative absorption based on awareness of in- and out-breathing |
+| samaṇakuttaka | sham recluse | one who merely wears the outward guise of an ascetic |
+| kāyasaṅkhāra | bodily formation | the in- and out-breath as conditioner of the body |
+| cittasaṅkhāra | mental formation | perception and feeling as conditioners of the mind |
+| paṭinissaggānupassī | contemplating relinquishment | the final tetrad-step of breath meditation |
+| asecanaka | unadulterated | unmixed, of unalloyed sweetness; epithet of a meditative abiding |
+| sañcicca | intentionally | deliberately, with full awareness and purpose |
+| jīvitā voropeti | deprives of life | cuts off the life-faculty; the act constituting the third pārājika |
+| adhiṭṭhāya | by command | having resolved upon it and given an order to kill |
+| vadhaka | the killer | the one who actually carries out the deed of killing |
+| visakkiya dūta | a messenger who goes astray | a messenger who passes the commission on to another |
+| opāta | pit-trap | a pit dug so that someone will fall in and die |
+| apassena | leaning-support | a board or prop rigged so as to cause death |
+| upanikkhipana | placing a weapon nearby | leaving a means of death within reach |
+| upahāra | presenting | bringing an object of sense before someone so as to cause death |
+| ācikkhanā | telling | giving deadly advice when asked |
+| anusāsanī | instructing | giving deadly advice unasked |
+| alābhaka | not obtaining | pining away through failure to get a desired object |
+| maraṇādhippāya | with the intention of causing death | the mental factor determining the third pārājika |
+| namaraṇādhippāya | one who had no intention of causing death | standard exemption clause |
+| asañcicca | unintentional | not done deliberately; standard exemption |
+| gabbhapātana | abortifacient | a means of procuring abortion |
+| kulūpaka bhikkhu | a bhikkhu who frequented the family | a monk who regularly visits a particular household |
+| vīmaṃsādhippāya | intending to make a test | acting out of a wish to experiment, not to kill |
+| uttarimanussadhamma | superhuman state | states surpassing ordinary human attainment: jhānas, liberations, paths and fruits |
+| alamariyañāṇadassana | knowledge and vision worthy of the noble ones | the standard qualifying phrase for a claim of superhuman attainment |
+| attupanāyika | of himself | referring or applying the attainment to oneself |
+| adhimāna | overestimation | mistaken conceit of having attained; the exemption in the fourth pārājika |
+| aññaṃ byākaroti | declares final knowledge | proclaims arahantship |
+| abbohārika | not to be reckoned as an offence | outside formal legal reckoning |
+| samanuggāhīyamāna | being cross-questioned | formally examined about a claimed attainment |
+| visuddhāpekkha | looking for purification | wishing to be cleared, e.g. by returning to lay status |
+| garubhaṇḍa | heavy property | the inalienable communal property of the Saṅgha |
+| vimokkha | liberation | the empty, signless and undirected liberations |
+| samāpatti | attainment | meditative attainment |
+| suññāgāre abhirati | delight in an empty hut | solitary meditative delight, reckoned a superhuman state |
+| adhimānena aññaṃ byākaroti | declares final knowledge through overestimation | claims attainment in good faith but mistakenly |
+| vinidhāya diṭṭhiṃ | he misrepresents his view | distorting one's actual view when making a false claim |
+| vinidhāya khantiṃ | he misrepresents his belief | distorting one's actual conviction |
+| vinidhāya ruciṃ | he misrepresents his preference | distorting one's actual liking or inclination |
+| vinidhāya bhāvaṃ | he misrepresents his state | distorting one's actual condition |
+| vinīvaraṇa | unobstructed | free from the obstruction or hindrance of a defilement |
+| tisso vijjā | the three true knowledges | recollection of past lives, the divine eye, destruction of the taints |
+| satipaṭṭhāna | foundation of mindfulness | the four establishments of mindfulness |
+| sammappadhāna | right striving | the four right exertions |
+| iddhipāda | basis of psychic power | the four roads to spiritual power |
+| bojjhaṅga | factor of enlightenment | the seven awakening factors |
+| suññata vimokkha | empty liberation | liberation through contemplation of emptiness |
+| animitta vimokkha | signless liberation | liberation through contemplation of the signless |
+| appaṇihita vimokkha | undirected liberation | liberation through contemplation of the undirected |

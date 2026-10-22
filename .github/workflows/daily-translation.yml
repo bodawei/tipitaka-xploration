@@ -2,7 +2,7 @@ name: Daily Tipitaka Translation
 
 on:
   schedule:
-#    - cron: '0 13 * * *'
+    - cron: '0 13 * * *'
   workflow_dispatch:
     inputs:
       chunk_size:
@@ -10,7 +10,7 @@ on:
         required: false
         type: string
       providers:
-        description: 'Space-separated providers to run (overrides the PROVIDERS repo variable), e.g. "claude kimi"'
+        description: 'Optional space-separated subset of the providers enabled in translation/state/providers.json, e.g. "claude kimi"'
         required: false
         type: string
       dry_run:
@@ -32,14 +32,20 @@ jobs:
     env:
       SOURCE_DIR: romn
       STATE_FILE: translation/state/translation-progress.json
+      PROVIDERS_FILE: translation/state/providers.json
       TRANSLATION_DIR: translation/results
       GLOSSARY_DIR: translation
       CHUNK_SIZE: ${{ inputs.chunk_size || vars.CHUNK_SIZE || '20' }}
-      PROVIDERS: ${{ inputs.providers || vars.PROVIDERS || 'claude kimi' }}
+      # Per-provider on/off switches live in PROVIDERS_FILE. This optional
+      # input only narrows the enabled set for a single run; it cannot enable
+      # a provider that is switched off in the state file.
+      PROVIDERS: ${{ inputs.providers }}
       ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || 'claude-sonnet-5' }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       KIMI_MODEL: ${{ vars.KIMI_MODEL || 'kimi-k2.6' }}
       KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+      DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-flash' }}
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
       EMAIL_FROM: ${{ vars.EMAIL_FROM }}
@@ -53,8 +59,8 @@ jobs:
         with:
           python-version: '3.12'
 
-#      - name: Run daily translation
-#        run: python translation/scripts/daily_translate.py
+      - name: Run daily translation
+        run: python translation/scripts/daily_translate.py
 
       # Runs even when the translation step failed, so that an email spooled
       # for retry (translation/state/pending-email/) survives to the next run —
@@ -65,5 +71,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add translation/state/ translation/results/ translation/glossary-*.md
-          git diff --cached --quiet || git commit -m "Advance translation progress [skip ci]"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "Advance translation progress [skip ci]"
+            git push
+          fi

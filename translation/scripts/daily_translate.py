@@ -4,11 +4,12 @@ Daily Tipitaka reading job.
 
 Reads the next chunk of verses from the current position in a rotating list of
 romn/*.mul.xml files and translates it into each configured target language
-with every provider named in PROVIDERS (default: claude and kimi), so the
-providers can be compared side by side. The providers translate the same chunk
-without consulting each other and keep fully separate progress state,
-glossaries, and result archives. Each translation is emailed via Resend and
-the on-disk progress state is advanced.
+with every provider enabled in the provider state file (claude, kimi, and
+deepseek by default), so the providers can be compared side by side. The
+providers translate the same chunk without consulting each other and keep
+fully separate progress state, glossaries, and result archives. Each
+translation is emailed via Resend and the on-disk progress state is advanced.
+If every provider is disabled, the job exits without doing any work.
 
 A "verse" is a <p rend="bodytext" n="N"> element plus any immediately
 following unnumbered <p rend="bodytext"> continuation paragraphs. A chunk
@@ -29,13 +30,15 @@ RESEND_URL = "https://api.resend.com/emails"
 
 CLAUDE_URL = "https://api.anthropic.com/v1/messages"
 KIMI_URL = "https://api.moonshot.ai/v1/chat/completions"
+DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 
 # Supported translation providers. Each names the environment variables that
 # carry its API key and model override, plus the model used when the override
-# is unset. The PROVIDERS environment variable (whitespace-separated names)
-# selects which run each day; together they translate the same chunk in
-# lockstep, keeping separate state, glossaries, and archives so their output
-# can be compared.
+# is unset. Which providers run each day is controlled by booleans in the
+# provider state file (translation/state/providers.json by default); the
+# optional PROVIDERS environment variable can narrow that set for one run.
+# Together the active providers translate the same chunk in lockstep, keeping
+# separate state, glossaries, and archives so their output can be compared.
 PROVIDERS = {
     "claude": {
         "label": "Claude",
@@ -48,6 +51,12 @@ PROVIDERS = {
         "key_env": "KIMI_API_KEY",
         "model_env": "KIMI_MODEL",
         "model_default": "kimi-k2.6",
+    },
+    "deepseek": {
+        "label": "DeepSeek",
+        "key_env": "DEEPSEEK_API_KEY",
+        "model_env": "DEEPSEEK_MODEL",
+        "model_default": "deepseek-flash",
     },
 }
 
@@ -443,11 +452,55 @@ def kimi_message(api_key, model, system, user_msg, truncation_hint):
     return content
 
 
+def deepseek_message(api_key, model, system, user_msg, truncation_hint):
+    """Call the DeepSeek chat-completions API, which is OpenAI-compatible.
+
+    Thinking mode is disabled: this job wants the translation itself, not the
+    model's reasoning trace, and it keeps the response faster and cheaper.
+    """
+    body = json.dumps(
+        {
+            "model": model,
+            "max_tokens": 16000,
+            "thinking": {"type": "disabled"},
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_msg},
+            ],
+        }
+    ).encode("utf-8")
+
+    req = urllib.request.Request(
+        DEEPSEEK_URL,
+        data=body,
+        method="POST",
+        headers={
+            "content-type": "application/json",
+            "authorization": f"Bearer {api_key}",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=180) as resp:
+        result = json.loads(resp.read().decode("utf-8"))
+
+    choice = result["choices"][0]
+    if choice.get("finish_reason") == "length":
+        raise RuntimeError(truncation_hint)
+
+    content = choice["message"]["content"]
+    if isinstance(content, list):
+        return "".join(
+            part.get("text", "") for part in content if part.get("type") == "text"
+        )
+    return content or ""
+
+
 def chat_message(provider, api_key, model, system, user_msg, truncation_hint):
     if provider == "claude":
         return anthropic_message(api_key, model, system, user_msg, truncation_hint)
     if provider == "kimi":
         return kimi_message(api_key, model, system, user_msg, truncation_hint)
+    if provider == "deepseek":
+        return deepseek_message(api_key, model, system, user_msg, truncation_hint)
     raise ValueError(f"Unknown provider {provider!r}")
 
 
@@ -789,26 +842,73 @@ def send_error_report(spool_dir, api_key, email_from, email_to, context, exc):
     )
 
 
-def load_active_providers():
-    """Resolve the PROVIDERS environment variable (whitespace-separated names)
-    into an ordered list of {"name", "label", "model", "key"} dicts, rejecting
-    unknown names, duplicates, and missing API keys."""
-    spec = os.environ.get("PROVIDERS", " ".join(PROVIDERS))
-    names = spec.split()
-    if not names:
-        raise RuntimeError("PROVIDERS is empty; set it to one or more of: "
-                           + ", ".join(sorted(PROVIDERS)))
-    active = []
-    seen = set()
-    for name in names:
-        if name not in PROVIDERS:
+def load_provider_toggles(path):
+    """Read the per-provider on/off booleans from the provider state file.
+
+    The file is a flat object of provider name -> boolean, e.g.
+    {"claude": true, "kimi": true, "deepseek": false}. A provider missing from
+    the file is treated as off, so adding a new provider to the registry does
+    not silently start spending money on it. If the file does not exist at all,
+    every provider is enabled (the historical behaviour).
+    """
+    if not os.path.exists(path):
+        return {name: True for name in PROVIDERS}
+
+    with open(path, encoding="utf-8") as f:
+        toggles = json.load(f)
+
+    if not isinstance(toggles, dict):
+        raise RuntimeError(f"{path} must contain a JSON object of provider name -> boolean")
+
+    unknown = sorted(set(toggles) - set(PROVIDERS))
+    if unknown:
+        raise RuntimeError(
+            f"Unknown provider(s) in {path}: {', '.join(unknown)}; "
+            f"expected one of: {', '.join(sorted(PROVIDERS))}"
+        )
+    for name, enabled in toggles.items():
+        if not isinstance(enabled, bool):
             raise RuntimeError(
-                f"Unknown provider {name!r} in PROVIDERS; "
-                f"expected one of: {', '.join(sorted(PROVIDERS))}"
+                f"Provider toggle {name!r} in {path} must be true or false, "
+                f"not {enabled!r}"
             )
-        if name in seen:
-            raise RuntimeError(f"Duplicate provider {name!r} in PROVIDERS")
-        seen.add(name)
+    return {name: toggles.get(name, False) for name in PROVIDERS}
+
+
+def load_active_providers(toggles):
+    """Resolve the enabled providers into an ordered list of
+    {"name", "label", "model", "key"} dicts.
+
+    Providers are enabled by the booleans in the provider state file. The
+    optional PROVIDERS environment variable (whitespace-separated names) can
+    narrow that set for one run, but it cannot re-enable a provider that is
+    switched off in the state file. Returns [] when nothing is enabled.
+    """
+    enabled = [name for name in PROVIDERS if toggles[name]]
+    if not enabled:
+        return []
+
+    spec = os.environ.get("PROVIDERS", "").split()
+    if spec:
+        seen = set()
+        for name in spec:
+            if name not in PROVIDERS:
+                raise RuntimeError(
+                    f"Unknown provider {name!r} in PROVIDERS; "
+                    f"expected one of: {', '.join(sorted(PROVIDERS))}"
+                )
+            if name in seen:
+                raise RuntimeError(f"Duplicate provider {name!r} in PROVIDERS")
+            if not toggles[name]:
+                raise RuntimeError(
+                    f"Provider {name!r} is disabled in the provider state file; "
+                    f"enable it there or remove it from PROVIDERS"
+                )
+            seen.add(name)
+        enabled = [name for name in enabled if name in seen]
+
+    active = []
+    for name in enabled:
         cfg = PROVIDERS[name]
         key = os.environ.get(cfg["key_env"])
         if not key:
@@ -877,6 +977,9 @@ def run_backfill_summary(active, spec, state, source_dir, translation_dir, gloss
 def main():
     source_dir = os.environ.get("SOURCE_DIR", "romn")
     state_base = os.environ.get("STATE_FILE", "translation/state/translation-progress.json")
+    providers_file = os.environ.get(
+        "PROVIDERS_FILE", "translation/state/providers.json"
+    )
     translation_dir = os.environ.get("TRANSLATION_DIR", "translation/results")
     glossary_dir = os.environ.get("GLOSSARY_DIR", "translation")
     spool_dir = os.environ.get("EMAIL_SPOOL_DIR", "translation/state/pending-email")
@@ -886,7 +989,12 @@ def main():
 
     context = "startup"
     try:
-        active = load_active_providers()
+        active = load_active_providers(load_provider_toggles(providers_file))
+        if not active:
+            # Nothing is switched on, so there is no translation, email, or
+            # state update to do. Exit successfully without touching anything.
+            print(f"All providers are disabled in {providers_file}; nothing to do.")
+            return
 
         files = sorted(f for f in os.listdir(source_dir) if f.endswith(".mul.xml"))
         if not files:
