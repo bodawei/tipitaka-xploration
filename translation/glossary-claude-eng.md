@@ -135,3 +135,7 @@ Managed automatically — new terms are appended as they first appear.
 | suññata vimokkha | empty liberation | liberation through contemplation of emptiness |
 | animitta vimokkha | signless liberation | liberation through contemplation of the signless |
 | appaṇihita vimokkha | undirected liberation | liberation through contemplation of the undirected |
+| anabhirati | discontent | dissatisfaction with the monastic life |
+| iddhivisaya | the range of psychic power | the sphere within which supernormal power operates, a standard exemption |
+| paribhogatthāya | for the sake of consuming | acting with intent to use or eat, not to steal |
+| gopakassa dāna | a gift made by a keeper | an offering made by an orchard-watchman rather than the owner |

@@ -147,3 +147,11 @@ Managed automatically — new terms are appended as they first appear.
 | anāgāmiphala | 阿那含果 | 不還果 |
 | arahatta | 阿羅漢果 | 無學果位 |
 | vinīvaraṇa citta | 心離蓋障 | 心不為貪瞋癡所覆蔽 |
+| suṅkaṭṭhāna | 稅關處 | 收取關稅之處所 |
+| paṃsukūlasaññī | 作糞掃物想 | 誤以為無主棄物之想 |
+| iddhivisaya | 神通境界 | 神通力所及之範圍 |
+| anabhirati | 不樂 | 厭離梵行、不樂修行之心 |
+| vibbhamati | 還俗 | 捨戒退失比丘身分 |
+| paribhogatthāya | 為受用之故 | 以受用（使用食用）為目的，非盜心 |
+| tekaṭulayāgu | 三味粥 | 胡麻、米、豆三物所製之粥 |
+| saddhivihārika | 共住弟子 | 依止和尚同住之弟子比丘 |
