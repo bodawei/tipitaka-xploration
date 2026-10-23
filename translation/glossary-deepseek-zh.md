@@ -147,3 +147,14 @@ Managed automatically — new terms are appended as they first appear.
 | anāgāmiphala | 阿那含果 | 不還果 |
 | arahatta | 阿羅漢果 | 無學果位 |
 | vinīvaraṇa citta | 心離蓋障 | 心不為貪瞋癡所覆蔽 |
+| jīvitā voropeti | 奪取生命 | 殺害、斷命 |
+| migalaṇḍika | 鹿杖 | 沙門劊子手之名 |
+| vippāṭisāra | 悔恨 | 後悔自責 |
+| mārakāyikā devatā | 魔類天神 | 屬於魔軍之天神 |
+| attanāpi attānaṃ jīvitā voropeti | 自己殺害自己 | 自殺 |
+| kāyassa bhedā paraṃ maraṇā | 身壞命終之後 | 死後 |
+| sugatiṃ saggaṃ lokaṃ upapajjati | 生於善趣天界 | 命終後投生善處 |
+| dibbāni pañca kāmaguṇāni | 五種天欲功德 | 天界之五欲境 |
+| asappāya | 不宜 | 不適當、有害 |
+| sañcicca | 故意 | 明知而為 |
+| satthahārakaṃ pariyesati | 尋求持刀者 | 尋找代為行殺之人 |

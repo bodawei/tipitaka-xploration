@@ -155,3 +155,12 @@ Managed automatically — new terms are appended as they first appear.
 | paribhogatthāya | 為受用之故 | 以受用（使用食用）為目的，非盜心 |
 | tekaṭulayāgu | 三味粥 | 胡麻、米、豆三物所製之粥 |
 | saddhivihārika | 共住弟子 | 依止和尚同住之弟子比丘 |
+| asubhakathā | 不淨法（說不淨） | 開示身不淨之教說 |
+| vippaṭisāra | 憂惱 | 事後悔恨、心生後悔 |
+| mārakāyikā devatā | 魔眾天神 | 屬魔眷屬之天神 |
+| vītarāga / avītarāga | 離貪／未離貪 | 是否已斷除貪欲 |
+| asecanaka | 純一無雜 | 不需添加、本自圓滿之味 |
+| parimukhaṃ satiṃ upaṭṭhapetvā | 令念現前 | 繫念於面前（鼻端） |
+| sabbakāyappaṭisaṃvedī | 覺知全身 | 遍覺息之全身 |
+| asappāya | 不適宜 | 於病不相宜之飲食 |
+| sāmañña / brahmañña | 沙門法／梵行法 | 沙門之實質與梵行之實質 |
