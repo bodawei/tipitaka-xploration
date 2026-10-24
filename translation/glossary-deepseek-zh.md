@@ -158,3 +158,8 @@ Managed automatically — new terms are appended as they first appear.
 | asappāya | 不宜 | 不適當、有害 |
 | sañcicca | 故意 | 明知而為 |
 | satthahārakaṃ pariyesati | 尋求持刀者 | 尋找代為行殺之人 |
+| ullapati | 揚言 | 出言宣說、高聲稱說 |
+| vippaṭisārī | 心生悔恨 | 於所作生起追悔之心 |
+| saṃvaṇṇanā | 讚歎 | 稱揚讚美，此指讚美死亡之語 |
+| upasaṃharati | 示現 | 將某境相呈現於人前 |
+| alābhakena sussati | 因不得之憂惱而枯竭 | 因所求不得而憂愁枯竭 |

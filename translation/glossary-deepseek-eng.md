@@ -135,3 +135,9 @@ Managed automatically — new terms are appended as they first appear.
 | suññata vimokkha | empty liberation | liberation through contemplation of emptiness |
 | animitta vimokkha | signless liberation | liberation through contemplation of the signless |
 | appaṇihita vimokkha | undirected liberation | liberation through contemplation of the undirected |
+| ullapati | calls out | utters an exclamation wishing or hoping that someone be killed |
+| pemaṇīya hadayaṅgama | lovely and heart-captivating | of a sound that stirs affection and grips the heart |
+| jeguccha pāṭikulya | loathsomeness and repulsion | the disgust and aversion produced by a foul object |
+| nerayika | one bound for hell | a person destined for the hell realms |
+| kalyāṇakamma | one of good deeds | a person of meritorious conduct |
+| sappi navanīta | ghee and fresh butter | clarified butter and newly churned butter, used as a deadly dose |
