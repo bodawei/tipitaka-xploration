@@ -112,9 +112,10 @@ the alphabetically-first file.
 
 A provider is one LLM API integration: `claude` (Anthropic Messages API),
 `kimi` (Moonshot chat-completions API), and `deepseek` (DeepSeek
-chat-completions API) are built in; the registry and dispatch live at the top
-of `translation/scripts/daily_translate.py`. Each provider carries its own
-API-key and model environment variables:
+chat-completions API) are built in; the registry lives in
+`translation/scripts/tipitaka_translate/config.py`, and the API clients and
+dispatch in `translation/scripts/tipitaka_translate/providers.py`. Each
+provider carries its own API-key and model environment variables:
 
 - `claude` — `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (default `claude-sonnet-5`)
 - `kimi` — `KIMI_API_KEY`, `KIMI_MODEL` (default `kimi-k2.6`)
@@ -244,8 +245,22 @@ The spool directory is set by `EMAIL_SPOOL_DIR` (default
 
 ## File and directory layout
 
-- `translation/scripts/daily_translate.py` — the job's entire logic (stdlib-only
-  Python, no pip install required).
+- `translation/scripts/daily_translate.py` — the entry point (stdlib-only
+  Python, no pip install required). It just calls into the package below.
+- `translation/scripts/tipitaka_translate/` — the job's implementation, split
+  by concern:
+  - `config.py` — provider registry (key/model env vars and defaults).
+  - `prompts.py` — system prompts, target languages, shared prompt instructions.
+  - `settings.py` — run configuration read from environment variables.
+  - `source.py` — XML parsing, the verse model, and chunk selection.
+  - `providers.py` — provider API clients, toggles, active-provider resolution.
+  - `translation.py` — prompt assembly and translate/summarise calls.
+  - `glossary.py` — glossary reading, new-term extraction, and appending.
+  - `mail.py` — Resend delivery and the failed-email spool.
+  - `archive.py` — result files under `translation/results/<provider>/`.
+  - `state.py` — saved-position files, path derivation, lockstep checks.
+  - `diagnostics.py` — failure diagnosis and the error-report email.
+  - `job.py` — orchestration for one run, end to end.
 - `translation/state/providers.json` — one on/off boolean per provider; the
   normal way to enable or disable a provider (see "Providers" above).
 - `translation/state/translation-progress-<provider>.json` — per-provider
