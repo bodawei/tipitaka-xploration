@@ -386,28 +386,46 @@ def format_pali(chunk):
     return "\n\n".join(f"[{v['label']}] {' '.join(v['texts'])}" for v in chunk)
 
 
+def post_json(url, headers, payload, timeout):
+    """POST a JSON payload and return the decoded JSON response.
+
+    On an HTTP error, the API's response body — which carries the real
+    explanation (e.g. which parameter was invalid) — is read and folded into
+    the raised error. urllib otherwise discards it, leaving only a useless
+    bare "HTTP Error 400: Bad Request" with no way to tell what went wrong.
+    """
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        method="POST",
+        headers=headers,
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise urllib.error.HTTPError(
+            exc.url, exc.code, f"{exc.reason}: {detail}", exc.headers, None
+        ) from None
+
+
 def anthropic_message(api_key, model, system, user_msg, truncation_hint):
-    body = json.dumps(
+    result = post_json(
+        CLAUDE_URL,
+        {
+            "content-type": "application/json",
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+        },
         {
             "model": model,
             "max_tokens": 16000,
             "system": system,
             "messages": [{"role": "user", "content": user_msg}],
-        }
-    ).encode("utf-8")
-
-    req = urllib.request.Request(
-        CLAUDE_URL,
-        data=body,
-        method="POST",
-        headers={
-            "content-type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
         },
+        120,
     )
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
 
     if result.get("stop_reason") == "max_tokens":
         raise RuntimeError(truncation_hint)
@@ -417,7 +435,12 @@ def anthropic_message(api_key, model, system, user_msg, truncation_hint):
 
 def kimi_message(api_key, model, system, user_msg, truncation_hint):
     """Call the Moonshot (Kimi) chat-completions API, which is OpenAI-compatible."""
-    body = json.dumps(
+    result = post_json(
+        KIMI_URL,
+        {
+            "content-type": "application/json",
+            "authorization": f"Bearer {api_key}",
+        },
         {
             "model": model,
             "max_completion_tokens": 16000,
@@ -425,20 +448,9 @@ def kimi_message(api_key, model, system, user_msg, truncation_hint):
                 {"role": "system", "content": system},
                 {"role": "user", "content": user_msg},
             ],
-        }
-    ).encode("utf-8")
-
-    req = urllib.request.Request(
-        KIMI_URL,
-        data=body,
-        method="POST",
-        headers={
-            "content-type": "application/json",
-            "authorization": f"Bearer {api_key}",
         },
+        180,
     )
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
 
     choice = result["choices"][0]
     if choice.get("finish_reason") == "length":
@@ -458,7 +470,12 @@ def deepseek_message(api_key, model, system, user_msg, truncation_hint):
     Thinking mode is disabled: this job wants the translation itself, not the
     model's reasoning trace, and it keeps the response faster and cheaper.
     """
-    body = json.dumps(
+    result = post_json(
+        DEEPSEEK_URL,
+        {
+            "content-type": "application/json",
+            "authorization": f"Bearer {api_key}",
+        },
         {
             "model": model,
             "max_tokens": 16000,
@@ -467,20 +484,9 @@ def deepseek_message(api_key, model, system, user_msg, truncation_hint):
                 {"role": "system", "content": system},
                 {"role": "user", "content": user_msg},
             ],
-        }
-    ).encode("utf-8")
-
-    req = urllib.request.Request(
-        DEEPSEEK_URL,
-        data=body,
-        method="POST",
-        headers={
-            "content-type": "application/json",
-            "authorization": f"Bearer {api_key}",
         },
+        180,
     )
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
 
     choice = result["choices"][0]
     if choice.get("finish_reason") == "length":
@@ -828,13 +834,64 @@ def emit_section_summaries(active, filename, section_verses, glossaries, spool_d
     return sec_header, summaries
 
 
+DIAGNOSIS_SYSTEM = (
+    "You are a senior software engineer debugging a Python batch job: a daily "
+    "script that reads Pali (IAST) verses from the Tipitaka and translates them "
+    "into English and Traditional Chinese by calling LLM provider HTTP APIs "
+    "(Anthropic/Claude, Moonshot/Kimi, DeepSeek) and emailing the results via "
+    "Resend. You are given exactly what the job was doing when it failed, the "
+    "exception, and the full traceback. State the single most likely root cause "
+    "and the concrete fix (name the file, function, parameter, or env var to "
+    "change). HTTP 4xx bodies from the provider APIs usually name the offending "
+    "parameter — read them closely. If the evidence is genuinely ambiguous, give "
+    "the top one or two causes and say what extra information would settle it. "
+    "Be specific and practical; no preamble, no padding."
+)
+
+
+def diagnose_failure(context, exc, tb):
+    """Ask DeepSeek to analyse a job failure and return its written diagnosis.
+
+    DeepSeek is used here as a debugging aide independent of whether it is an
+    enabled translation provider: it just needs DEEPSEEK_API_KEY. Any problem
+    producing the diagnosis (no key, network error, truncation) is reported
+    inline rather than raised — diagnosis must never derail the error report
+    that carries it.
+    """
+    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    if not api_key:
+        return "DeepSeek diagnosis skipped: DEEPSEEK_API_KEY is not set."
+    model = os.environ.get(
+        PROVIDERS["deepseek"]["model_env"], PROVIDERS["deepseek"]["model_default"]
+    )
+    user_msg = (
+        "The daily translation job (translation/scripts/daily_translate.py) "
+        "failed. Diagnose it.\n\n"
+        f"What it was doing (context): {context}\n\n"
+        f"Exception: {type(exc).__name__}: {exc}\n\n"
+        f"Full traceback:\n{tb}"
+    )
+    try:
+        return deepseek_message(
+            api_key, model, DIAGNOSIS_SYSTEM, user_msg,
+            "Diagnosis truncated: hit max_tokens output cap.",
+        )
+    except Exception as diag_exc:
+        return f"DeepSeek diagnosis unavailable ({type(diag_exc).__name__}: {diag_exc})."
+
+
 def send_error_report(spool_dir, api_key, email_from, email_to, context, exc):
+    tb = traceback.format_exc()
+    diagnosis = diagnose_failure(context, exc, tb)
+    print(f"DeepSeek diagnosis:\n{diagnosis}", file=sys.stderr)
     subject = f"Tipitaka job ERROR — {context}"
     body = (
         f"The daily Tipitaka translation job failed.\n\n"
         f"Context: {context}\n\n"
         f"{type(exc).__name__}: {exc}\n\n"
-        f"{traceback.format_exc()}"
+        f"{tb}\n"
+        f"{'=' * 60}\n"
+        f"DeepSeek diagnosis:\n\n{diagnosis}\n"
     )
     send_email_or_spool(
         spool_dir, api_key, email_from, email_to, subject, body,
