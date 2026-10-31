@@ -39,8 +39,9 @@ def diagnose_failure(context, exc, tb):
     api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not api_key:
         return "DeepSeek diagnosis skipped: DEEPSEEK_API_KEY is not set."
-    model = os.environ.get(
-        PROVIDERS["deepseek"]["model_env"], PROVIDERS["deepseek"]["model_default"]
+    model = (
+        os.environ.get(PROVIDERS["deepseek"]["model_env"], "").strip()
+        or PROVIDERS["deepseek"]["model_default"]
     )
     user_msg = (
         "The daily translation job (translation/scripts/tipitaka_translate/, "
@@ -50,10 +51,11 @@ def diagnose_failure(context, exc, tb):
         f"Full traceback:\n{tb}"
     )
     try:
-        return deepseek_message(
+        text, _usage = deepseek_message(
             api_key, model, DIAGNOSIS_SYSTEM, user_msg,
             "Diagnosis truncated: hit max_tokens output cap.",
         )
+        return text
     except Exception as diag_exc:
         return f"DeepSeek diagnosis unavailable ({type(diag_exc).__name__}: {diag_exc})."
 

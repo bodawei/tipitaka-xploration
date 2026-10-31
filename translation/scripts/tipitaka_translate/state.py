@@ -1,4 +1,5 @@
-"""Per-provider progress state: path derivation, loading, lockstep, saving."""
+"""Per-provider progress state (path derivation, loading, lockstep, saving)
+and the record of a submitted-but-uncollected batch."""
 import json
 import os
 
@@ -42,3 +43,28 @@ def save_state(state_base, provider, state):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2)
         f.write("\n")
+
+
+def load_pending(path):
+    """The batch submitted by an earlier run and not yet collected, or None.
+
+    Shape: {"submitted_at", "position": <saved state the chunk was selected
+    from>, "chunk_size", "file", "verse_range",
+    "batches": {provider: {"id", "model"}}}.
+    """
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_pending(path, record):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+
+def clear_pending(path):
+    if os.path.exists(path):
+        os.remove(path)

@@ -17,8 +17,10 @@ class Settings:
     translation_dir: str
     glossary_dir: str
     spool_dir: str
+    pending_batch_file: str
     chunk_size: int
     dry_run: bool
+    use_batch: bool
     summarize_verse: str
 
     @classmethod
@@ -36,7 +38,13 @@ class Settings:
             spool_dir=os.environ.get(
                 "EMAIL_SPOOL_DIR", "translation/state/pending-email"
             ),
+            pending_batch_file=os.environ.get(
+                "PENDING_BATCH_FILE", "translation/state/pending-batch.json"
+            ),
             chunk_size=int(os.environ.get("CHUNK_SIZE", "15")),
             dry_run=os.environ.get("DRY_RUN") == "1",
+            # USE_BATCH=0 sends every request directly for one run: results
+            # arrive the same day, at full price.
+            use_batch=os.environ.get("USE_BATCH", "1") != "0",
             summarize_verse=os.environ.get("SUMMARIZE_VERSE", "").strip(),
         )
