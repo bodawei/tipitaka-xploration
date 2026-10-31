@@ -14,7 +14,12 @@ on:
         required: false
         type: string
       dry_run:
-        description: 'Dry run: skip translation/email calls and just log the selected chunk'
+        description: 'Dry run: skip translation/email calls and just log the selected chunk (or the pending batch)'
+        required: false
+        type: boolean
+        default: false
+      sync:
+        description: 'Send this run''s requests directly instead of batching them: results the same day, at full price. A batch already pending is still collected first.'
         required: false
         type: boolean
         default: false
@@ -25,6 +30,12 @@ on:
 
 permissions:
   contents: write
+
+# A submitted batch is recorded in translation/state/pending-batch.json; two
+# overlapping runs could both submit (and pay for) the same chunk.
+concurrency:
+  group: daily-translation
+  cancel-in-progress: false
 
 jobs:
   translate:
@@ -50,6 +61,7 @@ jobs:
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
       EMAIL_FROM: ${{ vars.EMAIL_FROM }}
       DRY_RUN: ${{ (inputs.dry_run && '1') || '0' }}
+      USE_BATCH: ${{ (inputs.sync && '0') || '1' }}
       SUMMARIZE_VERSE: ${{ inputs.summarize_verse }}
     steps:
       - uses: actions/checkout@v4

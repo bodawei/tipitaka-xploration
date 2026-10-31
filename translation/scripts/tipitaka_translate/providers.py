@@ -10,102 +10,136 @@ import os
 from .config import PROVIDERS
 from .http import post_json
 
-CLAUDE_URL = "https://api.anthropic.com/v1/messages"
-KIMI_URL = "https://api.moonshot.ai/v1/chat/completions"
+ANTHROPIC_BASE = "https://api.anthropic.com/v1"
+KIMI_BASE = "https://api.moonshot.ai/v1"
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+
+MAX_OUTPUT_TOKENS = 16000
+
+
+def anthropic_headers(api_key):
+    return {
+        "content-type": "application/json",
+        "x-api-key": api_key,
+        "anthropic-version": "2023-06-01",
+    }
+
+
+def bearer_headers(api_key):
+    return {
+        "content-type": "application/json",
+        "authorization": f"Bearer {api_key}",
+    }
+
+
+def claude_reasoning_params(model):
+    """The cheapest reasoning setting each Claude model accepts.
+
+    Verse translation does not benefit from extended thinking, and thinking
+    tokens are billed as output. Models differ in what they accept:
+    Claude Opus 5.5 and the Fable/Mythos models cannot disable thinking at all
+    (a 400), so the most we can do is the lowest effort; Claude Sonnet 5.5
+    rejects "disabled" but treats "between_tools" as thinking-off when, as
+    here, no tools are in play; every other model accepts "disabled".
+    """
+    if model.startswith(("claude-opus-5-5", "claude-fable", "claude-mythos")):
+        return {"output_config": {"effort": "low"}}
+    if model.startswith("claude-sonnet-5-5"):
+        return {"thinking": {"type": "between_tools"}}
+    return {"thinking": {"type": "disabled"}}
+
+
+def anthropic_params(model, system, user_msg):
+    """Messages API request body, shared by direct and batch requests."""
+    return {
+        "model": model,
+        "max_tokens": MAX_OUTPUT_TOKENS,
+        "system": system,
+        "messages": [{"role": "user", "content": user_msg}],
+        **claude_reasoning_params(model),
+    }
+
+
+def parse_anthropic(result, truncation_hint):
+    """Return (text, usage) from a Messages API response."""
+    stop = result.get("stop_reason")
+    if stop == "max_tokens":
+        raise RuntimeError(truncation_hint)
+    if stop == "refusal":
+        raise RuntimeError(f"Claude declined the request: {result.get('stop_details')}")
+    text = "".join(
+        block["text"] for block in result["content"] if block["type"] == "text"
+    )
+    return text, result.get("usage") or {}
+
+
+def chat_completion_body(provider, model, system, user_msg):
+    """OpenAI-compatible request body for Kimi and DeepSeek, shared by direct
+    and batch requests. Thinking is disabled on both: this job wants the
+    translation itself, not a billed reasoning trace."""
+    body = {
+        "model": model,
+        "thinking": {"type": "disabled"},
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user_msg},
+        ],
+    }
+    if provider == "kimi":
+        body["max_completion_tokens"] = MAX_OUTPUT_TOKENS
+    else:
+        body["max_tokens"] = MAX_OUTPUT_TOKENS
+    return body
+
+
+def parse_chat_completion(result, truncation_hint):
+    """Return (text, usage) from an OpenAI-compatible chat completion."""
+    choice = result["choices"][0]
+    if choice.get("finish_reason") == "length":
+        raise RuntimeError(truncation_hint)
+
+    content = choice["message"]["content"]
+    if isinstance(content, list):
+        content = "".join(
+            part.get("text", "") for part in content if part.get("type") == "text"
+        )
+    return content or "", result.get("usage") or {}
 
 
 def anthropic_message(api_key, model, system, user_msg, truncation_hint):
     result = post_json(
-        CLAUDE_URL,
-        {
-            "content-type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-        },
-        {
-            "model": model,
-            "max_tokens": 16000,
-            "system": system,
-            "messages": [{"role": "user", "content": user_msg}],
-        },
+        f"{ANTHROPIC_BASE}/messages",
+        anthropic_headers(api_key),
+        anthropic_params(model, system, user_msg),
         120,
     )
-
-    if result.get("stop_reason") == "max_tokens":
-        raise RuntimeError(truncation_hint)
-
-    return "".join(block["text"] for block in result["content"] if block["type"] == "text")
+    return parse_anthropic(result, truncation_hint)
 
 
 def kimi_message(api_key, model, system, user_msg, truncation_hint):
     """Call the Moonshot (Kimi) chat-completions API, which is OpenAI-compatible."""
     result = post_json(
-        KIMI_URL,
-        {
-            "content-type": "application/json",
-            "authorization": f"Bearer {api_key}",
-        },
-        {
-            "model": model,
-            "max_completion_tokens": 16000,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user_msg},
-            ],
-        },
+        f"{KIMI_BASE}/chat/completions",
+        bearer_headers(api_key),
+        chat_completion_body("kimi", model, system, user_msg),
         180,
     )
-
-    choice = result["choices"][0]
-    if choice.get("finish_reason") == "length":
-        raise RuntimeError(truncation_hint)
-
-    content = choice["message"]["content"]
-    if isinstance(content, list):
-        return "".join(
-            part.get("text", "") for part in content if part.get("type") == "text"
-        )
-    return content
+    return parse_chat_completion(result, truncation_hint)
 
 
 def deepseek_message(api_key, model, system, user_msg, truncation_hint):
-    """Call the DeepSeek chat-completions API, which is OpenAI-compatible.
-
-    Thinking mode is disabled: this job wants the translation itself, not the
-    model's reasoning trace, and it keeps the response faster and cheaper.
-    """
+    """Call the DeepSeek chat-completions API, which is OpenAI-compatible."""
     result = post_json(
         DEEPSEEK_URL,
-        {
-            "content-type": "application/json",
-            "authorization": f"Bearer {api_key}",
-        },
-        {
-            "model": model,
-            "max_tokens": 16000,
-            "thinking": {"type": "disabled"},
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user_msg},
-            ],
-        },
+        bearer_headers(api_key),
+        chat_completion_body("deepseek", model, system, user_msg),
         180,
     )
-
-    choice = result["choices"][0]
-    if choice.get("finish_reason") == "length":
-        raise RuntimeError(truncation_hint)
-
-    content = choice["message"]["content"]
-    if isinstance(content, list):
-        return "".join(
-            part.get("text", "") for part in content if part.get("type") == "text"
-        )
-    return content or ""
+    return parse_chat_completion(result, truncation_hint)
 
 
 def chat_message(provider, api_key, model, system, user_msg, truncation_hint):
+    """Make one synchronous request; returns (text, usage)."""
     if provider == "claude":
         return anthropic_message(api_key, model, system, user_msg, truncation_hint)
     if provider == "kimi":
@@ -180,19 +214,23 @@ def load_active_providers(toggles):
             seen.add(name)
         enabled = [name for name in enabled if name in seen]
 
-    active = []
-    for name in enabled:
-        cfg = PROVIDERS[name]
-        key = os.environ.get(cfg["key_env"])
-        if not key:
-            raise RuntimeError(
-                f"Environment variable {cfg['key_env']} is not set "
-                f"(required for provider {name!r})"
-            )
-        active.append({
-            "name": name,
-            "label": cfg["label"],
-            "model": os.environ.get(cfg["model_env"], cfg["model_default"]),
-            "key": key,
-        })
-    return active
+    return [provider_config(name) for name in enabled]
+
+
+def provider_config(name, model=None):
+    """Resolve one provider into a {"name", "label", "model", "key"} dict.
+
+    `model` overrides the environment, for collecting a batch that was
+    submitted with a model the environment may since have changed. Model names
+    are stripped, so a stray space in a repository variable cannot break a run.
+    """
+    cfg = PROVIDERS[name]
+    key = os.environ.get(cfg["key_env"])
+    if not key:
+        raise RuntimeError(
+            f"Environment variable {cfg['key_env']} is not set "
+            f"(required for provider {name!r})"
+        )
+    if model is None:
+        model = os.environ.get(cfg["model_env"], "").strip() or cfg["model_default"]
+    return {"name": name, "label": cfg["label"], "model": model, "key": key}

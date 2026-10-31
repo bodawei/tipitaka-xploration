@@ -14,48 +14,73 @@ with the provider tagged in the subject.
 
 ## Flow
 
+Providers with a batch API (`claude`, `kimi`) are sent each chunk as a
+discounted asynchronous **batch**, so a chunk normally takes two runs: it is
+submitted on one day and finished on the next (see "Batching" below). Each run:
+
 1. Read the provider on/off booleans from
    `translation/state/providers.json` (see "Providers" below). If every
-   provider is switched off, stop here without translating, emailing, or
-   updating anything. An optional `PROVIDERS` run override can narrow the
-   enabled set further.
+   provider is switched off and no batch is pending, stop here without
+   translating, emailing, or updating anything. An optional `PROVIDERS` run
+   override can narrow the enabled set further.
 2. Load each enabled provider's saved position —
    `translation/state/translation-progress-<provider>.json`, each
-   `{"file": "<name>.mul.xml", "next_verse": N}`. When more than one provider
-   is enabled the positions must agree (the providers run in lockstep), so
-   a disagreement aborts the run with an error rather than producing a
-   mismatched comparison.
+   `{"file": "<name>.mul.xml", "next_verse": N}` — plus that of any provider
+   with a pending batch. The positions must agree (the providers run in
+   lockstep), so a disagreement aborts the run with an error rather than
+   producing a mismatched comparison.
 3. Retry any emails an earlier run could not send (see "Undeliverable email"
    below), before starting any work of this run's own.
-4. Parse that file (`romn/<name>.mul.xml`) and select the next chunk of verses
-   starting at `next_verse` (see "Verse and chunk model" below).
-5. For each provider and each target language, read that combination's
-   glossary (`translation/glossary-<provider>-<code>.md`, e.g.
-   `glossary-kimi-eng.md`) and include it in that request, so key Pali terms
-   are rendered the same way as in earlier runs (see "Glossaries" below).
-6. Translate the chunk's Pali text with every provider into each target
-   language. Each response also reports any new key terms it introduced. All
-   translations finish before any email goes out.
-7. Email each translation separately via the Resend API, tagged by provider:
-   `Tipitaka reading [claude]: …`, `Tipitaka reading [kimi] (Traditional
-   Chinese): …`, and so on.
-8. If this chunk completed a section (see "Section summaries" below), gather
-   the whole just-finished section's Pali and email a condensed prose summary
-   per provider per language.
-9. Write the archive files per provider under
-   `translation/results/<provider>/` (Pali only, one per target language, a
-   combined record, and — when a section completed — a `summary-<code>` file
-   per language; see `translation/results/README.md`), and append any
-   newly-introduced key terms to each provider's glossary files.
-10. Update every enabled provider's state file to point at the verse after
-    the last one translated (or the start of the next file, if the chunk
-    reached the end of the current one).
-11. The GitHub Actions workflow commits and pushes the updated states, new
-    archive files, and any glossary additions back to the repo.
+4. **Collect.** If `translation/state/pending-batch.json` records a batch
+   submitted by an earlier run, ask each batch provider whether it has
+   finished. If any is still running, stop; the next run checks again. Once
+   all have finished:
+   1. Fetch every batch result. If any request failed or expired, discard the
+      pending batch, send an error report, and exit non-zero; the next run
+      submits the same chunk again.
+   2. Re-select the pending chunk from the position recorded with it, and
+      translate it directly with every enabled provider that was not in the
+      batch (`deepseek`, which has no batch API).
+   3. **Finish the chunk** for every provider together: email each
+      translation separately via the Resend API, tagged by provider
+      (`Tipitaka reading [claude]: …`, `Tipitaka reading [deepseek]
+      (Traditional Chinese): …`, and so on); if the chunk completed a section
+      (see "Section summaries"), email the condensed prose summaries too;
+      write the archive files under `translation/results/<provider>/` (see
+      `translation/results/README.md`); append newly-introduced key terms to
+      each provider's glossaries; and update every provider's state file to
+      point at the verse after the chunk (or the start of the next file, if
+      the chunk reached the end of the current one). Then delete the
+      pending-batch record.
+5. **Submit.** Parse the file at the (possibly just-advanced) position
+   (`romn/<name>.mul.xml`) and select the next chunk of verses (see "Verse and
+   chunk model" below). Build each batch provider's requests — one
+   translation per target language, each carrying that provider's glossary
+   for the language (see "Glossaries" below), plus one summary per language
+   when the chunk completes a section — and submit them as one batch per
+   provider. Record the batch ids in `pending-batch.json` and exit.
+6. The GitHub Actions workflow commits and pushes the updated states, the
+   pending-batch record, new archive files, and any glossary additions back
+   to the repo.
 
-Steps 5–10 are atomic: if anything fails partway, nothing from that run is
-kept — no partial archive files, no glossary additions, no state advance — so
-the same chunk is simply retried on the next run. Email delivery is the one
+If no batch provider is enabled, or the run sets `USE_BATCH=0`, step 5
+instead translates the chunk directly with every enabled provider and
+finishes it (step 4.3) in the same run.
+
+Every email in a run opens with the token usage the API reported for the
+request that produced it: a readable line naming the provider, the model, and
+whether it came through the batch API (with its discount) or the direct API,
+followed by the provider's `usage` object exactly as returned, as raw JSON:
+
+```
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=8412, output_tokens=3906, ...
+Raw usage JSON: {"input_tokens": 8412, "output_tokens": 3906, ...}
+```
+
+Finishing a chunk is atomic: if anything fails partway, nothing is kept — no
+partial archive files, no glossary additions, no state advance. A pending
+batch is kept, so the next run collects it again (results stay available for
+29 days) and retries the direct providers. Email delivery is the one
 exception: it is retried out of a spool rather than rolling the run back (see
 "Undeliverable email"). See "Error handling" below.
 
@@ -117,7 +142,8 @@ chat-completions API) are built in; the registry lives in
 dispatch in `translation/scripts/tipitaka_translate/providers.py`. Each
 provider carries its own API-key and model environment variables:
 
-- `claude` — `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (default `claude-sonnet-5`)
+- `claude` — `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (default `claude-sonnet-5`;
+  surrounding whitespace in any model variable is ignored)
 - `kimi` — `KIMI_API_KEY`, `KIMI_MODEL` (default `kimi-k2.6`)
 - `deepseek` — `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL` (default `deepseek-flash`)
 
@@ -158,6 +184,65 @@ startup lockstep check will refuse to run until the positions agree again —
 finish the catch-up with single-provider runs, or edit the state files by
 hand.
 
+## Batching
+
+`claude` uses the Anthropic Message Batches API (50% off every token) and
+`kimi` the Moonshot batch API (40% off). A batch usually finishes well within
+an hour, but may take up to 24 hours before it expires, so the job never waits
+for one: it submits a chunk and collects the results on the next run. The
+emails and archives for a chunk therefore arrive one run after it is selected,
+and are dated by the run that finished it. On the very first run after
+batching is turned on, a chunk is submitted but nothing is emailed.
+
+`deepseek` has no batch API. It is called directly, but only at collection
+time, on the same chunk, so that every provider's state advances together.
+(DeepSeek's off-peak rates are already half price, and the scheduled run time
+falls outside its peak hours.)
+
+The record of a submitted batch is `translation/state/pending-batch.json` (set
+by `PENDING_BATCH_FILE`):
+
+```json
+{
+  "submitted_at": "2026-11-01T13:05:12Z",
+  "position": {"file": "vin01m.mul.xml", "next_verse": 180},
+  "chunk_size": 10,
+  "file": "vin01m.mul.xml",
+  "verse_range": "180-189",
+  "batches": {"claude": {"id": "msgbatch_…", "model": "claude-sonnet-5"}}
+}
+```
+
+The chunk itself is not stored: collection re-selects it from `position` and
+`chunk_size`, and refuses to continue if that no longer yields the recorded
+file and verse range. Each batch is collected with the model it was submitted
+with, even if the model variable has since changed. A provider switched off
+after submission is still collected and advanced, since its results are
+already paid for; a provider switched on after submission translates the
+pending chunk directly.
+
+If submitting to a second provider fails after the first succeeded, the first
+batch is cancelled (best effort) and the run fails, so the next run submits
+afresh. The workflow allows only one run at a time, so a manual run cannot
+submit the same chunk twice alongside the scheduled one.
+
+The manual run's `sync` input sets `USE_BATCH=0`: that run sends its requests
+directly, at full price, and finishes the chunk the same day. A batch already
+pending is still collected first.
+
+## Reasoning ("thinking") settings
+
+Translation does not benefit from extended reasoning, and reasoning tokens are
+billed as output, so every request asks for the least reasoning its model
+allows:
+
+- `kimi` and `deepseek`: `thinking: {"type": "disabled"}`.
+- `claude`: `thinking: {"type": "disabled"}` on most models (including
+  `claude-sonnet-5`); `thinking: {"type": "between_tools"}` on
+  `claude-sonnet-5-5`, which rejects `disabled`; and `effort: "low"` on
+  `claude-opus-5-5` and the Fable/Mythos models, which cannot turn thinking
+  off at all.
+
 ## Glossaries
 
 Each provider-and-language combination keeps a running glossary of key Pali
@@ -195,7 +280,8 @@ verse boundaries are flattened and the text is abridged to roughly one tenth
 its length (~90% reduction). The current glossary is supplied for term
 consistency, but summaries do not themselves add glossary entries.
 
-Each summary is emailed (subject tagged with the provider) and also archived
+Summaries are part of the chunk's batch for batch providers. Each summary is
+emailed (subject tagged with the provider) and also archived
 to `translation/results/<provider>/summary-<code>-YYYY-MM-DD-runN.txt`
 (sharing the run's date and run number). On a chunk that stops mid-section
 (because it hit `CHUNK_SIZE`), no summary is produced.
@@ -206,7 +292,8 @@ If a section boundary went undetected, its summary was never sent and the job
 has since read past it. Setting `SUMMARIZE_VERSE` to a verse number (or
 `<file>.mul.xml:<verse>`) runs a summary-only pass over the whole section
 containing that verse: it emails and archives the summaries exactly as a normal
-run would — for every enabled provider — but translates nothing, adds no
+run would — for every enabled provider, sent directly rather than batched —
+but translates nothing, adds no
 glossary terms, and leaves the saved position untouched. It is also exposed as
 the `summarize_verse` input on the manual `workflow_dispatch` run.
 
@@ -253,18 +340,23 @@ The spool directory is set by `EMAIL_SPOOL_DIR` (default
   - `prompts.py` — system prompts, target languages, shared prompt instructions.
   - `settings.py` — run configuration read from environment variables.
   - `source.py` — XML parsing, the verse model, and chunk selection.
-  - `providers.py` — provider API clients, toggles, active-provider resolution.
-  - `translation.py` — prompt assembly and translate/summarise calls.
+  - `providers.py` — provider API clients, toggles, active-provider resolution,
+    reasoning settings.
+  - `batch.py` — batch submission, status, and results (`claude`, `kimi`).
+  - `translation.py` — request assembly, direct calls, and usage lines.
   - `glossary.py` — glossary reading, new-term extraction, and appending.
   - `mail.py` — Resend delivery and the failed-email spool.
   - `archive.py` — result files under `translation/results/<provider>/`.
-  - `state.py` — saved-position files, path derivation, lockstep checks.
+  - `state.py` — saved-position files, path derivation, lockstep checks, and
+    the pending-batch record.
   - `diagnostics.py` — failure diagnosis and the error-report email.
-  - `job.py` — orchestration for one run, end to end.
+  - `job.py` — orchestration: collect the pending batch, submit the next.
 - `translation/state/providers.json` — one on/off boolean per provider; the
   normal way to enable or disable a provider (see "Providers" above).
 - `translation/state/translation-progress-<provider>.json` — per-provider
   current position (file + next verse).
+- `translation/state/pending-batch.json` — the batch submitted by the last
+  run and not yet collected (see "Batching"). Absent when nothing is pending.
 - `translation/state/pending-email/` — emails that failed to send, awaiting
   retry (see "Undeliverable email"). Empty in the normal case.
 - `translation/results/<provider>/` — per-provider daily archive output
@@ -309,7 +401,9 @@ The workflow can also be run manually (`workflow_dispatch`) with an optional
 that run, a `dry_run` toggle that skips the model calls, the emails, the
 archive files, the glossary updates, and the state updates — it only logs the
 selected chunk, for safe testing — and a `summarize_verse` input that backfills
-a missed section summary (see "Backfilling a missed summary").
+a missed section summary (see "Backfilling a missed summary"), and a `sync`
+toggle that sends that run's requests directly instead of batching them (see
+"Batching"). With a batch pending, a dry run only reports it.
 
 ## Error handling
 
@@ -323,6 +417,11 @@ secrets), the report is spooled for retry like any other message, and the run
 still exits non-zero, so the failure is visible as a red run in the Actions
 tab even in that fallback case.
 
+A batch whose requests failed or expired is reported the same way (context
+e.g. `vin01m.mul.xml verses 180-189 (collecting claude batch)`); the batch is
+discarded first, so the next run resubmits the chunk. A batch that is simply
+still running is not an error: the run logs it and exits successfully.
+
 A send failure on its own is not one of these errors: it is spooled and
 retried, and the run completes successfully.
 
@@ -330,7 +429,7 @@ retried, and the run completes successfully.
 
 - Dates and run numbering (`run1`, `run2`, ...) use UTC, matching the cron
   schedule.
-- With all three providers enabled, each run emails one message per provider
+- With all three providers enabled, each finished chunk emails one message per provider
   per target language (the verse-by-verse translation), plus, when a section
   completes, one condensed prose summary per provider per language — six
   reading emails and up to six summary emails per day. The Pali text and the

@@ -1,4 +1,10 @@
-"""Prompt assembly and model calls for translating and summarising text."""
+"""Prompt assembly, direct model calls, and usage reporting.
+
+A request is a plain dict {"system", "user", "hint"} so the same request can be
+sent directly (`run`) or bundled into a provider batch (batch.submit).
+"""
+import json
+
 from . import providers
 from .prompts import GLOSSARY_INSTRUCTION, VERSE_NUMBER_INSTRUCTION
 from .source import format_pali
@@ -20,30 +26,55 @@ def glossary_block(glossary):
     return f"Established glossary (reuse these renderings):\n{glossary}\n\n"
 
 
-def call_model(provider, api_key, model, system, filename, heading, chunk, glossary=""):
-    heading_str = " — ".join(heading) if heading else "(untitled section)"
-    user_msg = (
-        f"{glossary_block(glossary)}Text: {filename}\n"
-        f"Section: {heading_str}\n\n{format_pali(chunk)}"
-    )
-    return providers.chat_message(
-        provider,
-        api_key, model, system + VERSE_NUMBER_INSTRUCTION + GLOSSARY_INSTRUCTION,
-        user_msg,
-        TRANSLATION_TRUNCATION_HINT,
-    )
+def _heading_str(heading):
+    return " — ".join(heading) if heading else "(untitled section)"
 
 
-def summarize_section(provider, api_key, model, system, filename, heading, section_verses, glossary=""):
+def translation_request(system, filename, heading, chunk, glossary=""):
+    return {
+        "system": system + VERSE_NUMBER_INSTRUCTION + GLOSSARY_INSTRUCTION,
+        "user": (
+            f"{glossary_block(glossary)}Text: {filename}\n"
+            f"Section: {_heading_str(heading)}\n\n{format_pali(chunk)}"
+        ),
+        "hint": TRANSLATION_TRUNCATION_HINT,
+    }
+
+
+def summary_request(system, filename, heading, section_verses, glossary=""):
     """Condensed prose summary of a whole section (verse boundaries flattened)."""
-    heading_str = " — ".join(heading) if heading else "(untitled section)"
     pali_prose = " ".join(" ".join(v["texts"]) for v in section_verses)
-    user_msg = (
-        f"{glossary_block(glossary)}Text: {filename}\n"
-        f"Section: {heading_str}\n\n{pali_prose}"
-    )
+    return {
+        "system": system,
+        "user": (
+            f"{glossary_block(glossary)}Text: {filename}\n"
+            f"Section: {_heading_str(heading)}\n\n{pali_prose}"
+        ),
+        "hint": SUMMARY_TRUNCATION_HINT,
+    }
+
+
+def run(provider, request):
+    """Send one request directly; returns (text, usage)."""
     return providers.chat_message(
-        provider,
-        api_key, model, system, user_msg,
-        SUMMARY_TRUNCATION_HINT,
+        provider["name"], provider["key"], provider["model"],
+        request["system"], request["user"], request["hint"],
+    )
+
+
+def _flatten(usage, prefix=""):
+    for key, value in usage.items():
+        if isinstance(value, dict):
+            yield from _flatten(value, f"{prefix}{key}.")
+        elif value is not None and not isinstance(value, list):
+            yield f"{prefix}{key}", value
+
+
+def usage_header(provider_name, model, usage, via):
+    """Token usage for the top of an email: a readable summary line, then the
+    `usage` object exactly as the API returned it, as raw JSON."""
+    fields = ", ".join(f"{k}={v}" for k, v in _flatten(usage)) or "not reported"
+    return (
+        f"Usage [{provider_name} · {model} · {via}]: {fields}\n"
+        f"Raw usage JSON: {json.dumps(usage, ensure_ascii=False)}"
     )

@@ -20,7 +20,9 @@ def next_run_number(translation_dir, date_str):
     return max_run + 1
 
 
-def write_translation_files(translation_dir, date_str, run_n, header, translations, pali_text):
+def write_translation_files(translation_dir, date_str, run_n, header, translations, usage, pali_text):
+    """`usage` maps language code to its usage header, which heads that
+    language's file just as it heads the email."""
     os.makedirs(translation_dir, exist_ok=True)
     suffix = f"{date_str}-run{run_n}.txt"
 
@@ -29,7 +31,7 @@ def write_translation_files(translation_dir, date_str, run_n, header, translatio
 
     for code, translation in translations.items():
         with open(os.path.join(translation_dir, f"{code}-{suffix}"), "w", encoding="utf-8") as f:
-            f.write(f"{header}\n{translation}\n")
+            f.write(f"{usage[code]}\n\n{header}\n{translation}\n")
 
     with open(os.path.join(translation_dir, f"full-{suffix}"), "w", encoding="utf-8") as f:
         f.write(f"{header}\n{translations['eng']}\n\n")
@@ -40,9 +42,9 @@ def write_translation_files(translation_dir, date_str, run_n, header, translatio
         f.write(f"{'-' * 40}\nOriginal (Pali, IAST):\n\n{pali_text}\n")
 
 
-def write_summary_files(translation_dir, date_str, run_n, header, summaries):
+def write_summary_files(translation_dir, date_str, run_n, header, summaries, usage):
     os.makedirs(translation_dir, exist_ok=True)
     suffix = f"{date_str}-run{run_n}.txt"
     for code, summary in summaries.items():
         with open(os.path.join(translation_dir, f"summary-{code}-{suffix}"), "w", encoding="utf-8") as f:
-            f.write(f"{header}\n{summary}\n")
+            f.write(f"{usage[code]}\n\n{header}\n{summary}\n")
