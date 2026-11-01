@@ -141,3 +141,11 @@ Managed automatically — new terms are appended as they first appear.
 | nerayika | one bound for hell | a person destined for the hell realms |
 | kalyāṇakamma | one of good deeds | a person of meritorious conduct |
 | sappi navanīta | ghee and fresh butter | clarified butter and newly churned butter, used as a deadly dose |
+| sedesuṃ | made him sweat | treated a sick bhikkhu by inducing sweating, here with fatal result |
+| natthuṃ adaṃsu | gave a nasal medicine | administered a medicinal substance through the nose |
+| sambāhesuṃ | massaged | rubbed or kneaded the body of a sick bhikkhu |
+| vāḷayakkhavihāra | haunt of fierce yakkhas | a dwelling-place of savage yakkhas |
+| vāḷakantāra | wilderness of wild beasts | a wild tract infested by dangerous animals |
+| corakantāra | wilderness of thieves | a wild tract infested by bandits |
+| bhūtavejjako | spirit-doctor | one who treats afflictions caused by spirits |
+| uttanto anassāsako | choking, unable to catch his breath | lit. "with breath cut off, not catching breath" |
