@@ -1,0 +1,15 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=6372, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=780, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 6372, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 780, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, verses 190-192
+
+[190] Now at that time the bhikkhus of the group of six set fire to a forest; people were burned and died. They felt remorse… "There is no offence, bhikkhus, for one who had no intention of causing death." Now at that time the bhikkhus of the group of six, with the intention of causing death, set fire to a forest. People were burned and died… people were burned but did not die. They felt remorse… "There is no offence entailing defeat, bhikkhus; there is a grave offence."
+
+[191] Now at that time a certain bhikkhu went to the execution ground and said this to the executioner: "Friend, do not torment this man. Deprive him of life with a single blow." "Very well, venerable sir," he said, and deprived him of life with a single blow. He felt remorse… "You, bhikkhu, have committed an offence entailing defeat."
+
+Now at that time a certain bhikkhu went to the execution ground and said this to the executioner: "Friend, do not torment this man. Deprive him of life with a single blow." Saying, "I will not do as you say," he deprived him of life. He felt remorse… "There is no offence entailing defeat, bhikkhu; there is an offence of wrong-doing."
+
+[192] Now at that time a certain man whose hands and feet had been cut off was in the house of his relatives, surrounded by his kinsfolk. A certain bhikkhu said this to those people: "Friends, do you wish for this man's death?" "Yes, venerable sir, we do wish it." "Then give him buttermilk to drink." They gave him buttermilk to drink. He died. The bhikkhu felt remorse… "You, bhikkhu, have committed an offence entailing defeat."
+
+Now at that time a certain man whose hands and feet had been cut off was in a family house, surrounded by his kinsfolk. A certain bhikkhunī said this to those people: "Friends, do you wish for this man's death?" "Yes, noble lady, we do wish it." "Then give him salted sour gruel to drink." They gave him salted sour gruel to drink. He died. She felt remorse. Then that bhikkhunī reported this matter to the bhikkhunīs. The bhikkhunīs reported this matter to the bhikkhus. The bhikkhus reported this matter to the Blessed One. "That bhikkhunī, bhikkhus, has committed an offence entailing defeat."

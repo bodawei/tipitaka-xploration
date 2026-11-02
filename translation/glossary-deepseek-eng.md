@@ -149,3 +149,8 @@ Managed automatically — new terms are appended as they first appear.
 | corakantāra | wilderness of thieves | a wild tract infested by bandits |
 | bhūtavejjako | spirit-doctor | one who treats afflictions caused by spirits |
 | uttanto anassāsako | choking, unable to catch his breath | lit. "with breath cut off, not catching breath" |
+| ālimpeti | set fire to | to kindle or ignite a tract, here a forest, so as to cause death |
+| āghātana | place of execution | the ground where criminals are put to death |
+| coraghāta | executioner | lit. "thief-slayer", the one who carries out the execution |
+| takka | buttermilk | a thin sour milk drink, here given as a lethal dose |
+| loṇasovīraka | salt-sovīraka | a salty sour fermented drink, here given as a lethal dose |

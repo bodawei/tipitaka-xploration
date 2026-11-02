@@ -198,3 +198,7 @@ Managed automatically — new terms are appended as they first appear.
 | saggakathā | 天界之事 | 談論生天之法 |
 | nirayakathā | 地獄之事 | 談論地獄之苦 |
 | uttasita | 驚懼 | 恐懼害怕 |
+| takka | 酸粥 | 一種酸味之粥飲 |
+| loṇasovīraka | 鹽酸粥 | 以鹽與酸味調製之粥飲 |
+| āghātana | 刑場 | 執行死刑之處 |
+| coraghāta | 劊子手 | 執行死刑、殺盜賊者 |

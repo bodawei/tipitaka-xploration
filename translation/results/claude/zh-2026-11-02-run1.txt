@@ -1,0 +1,11 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=7228, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=832, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 7228, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 832, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, verses 190-192
+
+[190] 那時，六群比丘放火燒林；有人被燒死。他們心生追悔……乃至……「比丘們，無致死之意圖者，無罪。」那時，六群比丘以致死之意圖放火燒林。有人被燒而死……乃至……有人被燒而未死。他們心生追悔……乃至……「比丘們，不犯波羅夷；犯偷蘭遮。」
+
+[191] 那時，有一比丘前往刑場，對劊子手這樣說：「賢友，別使此人受苦。一擊奪其命吧。」「好的，大德。」便一擊奪其命。那比丘心生追悔……乃至……「比丘，你犯了波羅夷罪。」那時，有一比丘前往刑場，對劊子手這樣說：「賢友，別使此人受苦。一擊奪其命吧。」那人說：「我不照你的話做。」便奪其命。那比丘心生追悔……乃至……「比丘，不犯波羅夷；犯突吉羅。」
+
+[192] 那時，有一男子在親屬家中手足被截斷，為親屬們圍繞著。有一比丘對那些人這樣說：「賢友們，你們希望此人死嗎？」「是的，大德，我們希望。」「那麼就給他喝酪漿吧。」他們便給他喝酪漿。他就死了。那比丘心生追悔……乃至……「比丘，你犯了波羅夷罪。」那時，有一男子在俗家中手足被截斷，為親屬們圍繞著。有一比丘尼對那些人這樣說：「賢友們，你們希望此人死嗎？」「是的，聖尼，我們希望。」「那麼就給他喝鹽酸漿吧。」他們便給他喝鹽酸漿。他就死了。那比丘尼心生追悔。於是那比丘尼把此事告訴眾比丘尼。比丘尼們把此事告訴眾比丘。比丘們把此事稟告世尊。「比丘們，那比丘尼犯了波羅夷罪。」

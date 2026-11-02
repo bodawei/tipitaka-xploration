@@ -164,3 +164,7 @@ Managed automatically — new terms are appended as they first appear.
 | sabbakāyappaṭisaṃvedī | 覺知全身 | 遍覺息之全身 |
 | asappāya | 不適宜 | 於病不相宜之飲食 |
 | sāmañña / brahmañña | 沙門法／梵行法 | 沙門之實質與梵行之實質 |
+| dāyaṃ ālimpeti | 放火燒林 | 縱火焚燒林野 |
+| āghātana | 刑場 | 處決罪人之處 |
+| coraghāta | 劊子手 | 行刑斬賊者 |
+| loṇasovīraka | 鹽酸漿 | 鹽與酸物調製之藥飲 |
