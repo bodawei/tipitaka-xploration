@@ -139,3 +139,10 @@ Managed automatically — new terms are appended as they first appear.
 | iddhivisaya | the range of psychic power | the sphere within which supernormal power operates, a standard exemption |
 | paribhogatthāya | for the sake of consuming | acting with intent to use or eat, not to steal |
 | gopakassa dāna | a gift made by a keeper | an offering made by an orchard-watchman rather than the owner |
+| mahācora | great thief | the five kinds of great robber, the worst being the false claimant to attainment |
+| anuddhaṃseti | charges with a groundless accusation | to defame a pure bhikkhu with an unfounded allegation |
+| chaḷabhiñña | one of the six direct knowledges | possessor of the six supernormal knowledges |
+| maggabhāvanā | development of the path | cultivation of the thirty-seven requisites of enlightenment |
+| phalasacchikiriyā | realisation of the fruits | attainment of the four noble fruits |
+| kilesappahāna | abandoning of the defilements | the giving up of lust, hatred and delusion |
+| salākāvutta | food distributed by ticket | famine-time rationing by means of tokens |

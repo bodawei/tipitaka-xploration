@@ -168,3 +168,8 @@ Managed automatically — new terms are appended as they first appear.
 | āghātana | 刑場 | 處決罪人之處 |
 | coraghāta | 劊子手 | 行刑斬賊者 |
 | loṇasovīraka | 鹽酸漿 | 鹽與酸物調製之藥飲 |
+| maggabhāvanā | 道之修習 | 三十七道品等聖道之修習 |
+| phalasacchikiriyā | 果之作證 | 四沙門果之現證 |
+| kilesappahāna | 斷除煩惱 | 斷貪瞋癡 |
+| chaḷabhiñña | 六神通 | 具足六種神通者 |
+| ākāra (tīhākārehi) | 行相 | 構成故妄語之心念要素 |

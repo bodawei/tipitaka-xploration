@@ -202,3 +202,13 @@ Managed automatically — new terms are appended as they first appear.
 | loṇasovīraka | 鹽酸粥 | 以鹽與酸味調製之粥飲 |
 | āghātana | 刑場 | 執行死刑之處 |
 | coraghāta | 劊子手 | 執行死刑、殺盜賊者 |
+| vaggumudā | 跋求摩河 | 毘舍離附近之河名，諸比丘於此岸入雨安居 |
+| dubbhikkha | 饑饉 | 食物匱乏之時 |
+| dvīhitika | 難得之食 | 饑饉時飲食極難得 |
+| setaṭṭhika | 白骨之色 | 饑饉之相，或釋為白米僅餘糠秕 |
+| jhāna | 禪 | 四禪，色界定之層次 |
+| chaḷabhiñña | 六神通者 | 具足六種神通之人 |
+| kalyāṇadhamma | 善法 | 具善德者 |
+| govikantana | 屠牛刀 | 利刃 |
+| attupanāyika | 足以成聖 | 能令自身趣向聖道之法 |
+| sandiṭṭha sambhatta | 相識相親 | 相熟而親近之友伴 |

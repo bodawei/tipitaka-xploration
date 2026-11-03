@@ -154,3 +154,10 @@ Managed automatically — new terms are appended as they first appear.
 | coraghāta | executioner | lit. "thief-slayer", the one who carries out the execution |
 | takka | buttermilk | a thin sour milk drink, here given as a lethal dose |
 | loṇasovīraka | salt-sovīraka | a salty sour fermented drink, here given as a lethal dose |
+| jhāna | jhāna | meditative absorption; the four form-sphere trance states |
+| sotāpanna | stream-enterer | one who has entered the stream to Nibbāna |
+| sakadāgāmī | once-returner | one who will return to this world only once more |
+| anāgāmī | non-returner | one who will not return to this world |
+| arahant | arahant | one who has destroyed the taints and attained final liberation |
+| tevijja | one with the three true knowledges | one possessing the three vijjās |
+| chaḷabhiñña | one with the six higher knowledges | one possessing the six abhiññās |
