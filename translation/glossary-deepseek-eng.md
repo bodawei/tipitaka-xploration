@@ -161,3 +161,17 @@ Managed automatically — new terms are appended as they first appear.
 | arahant | arahant | one who has destroyed the taints and attained final liberation |
 | tevijja | one with the three true knowledges | one possessing the three vijjās |
 | chaḷabhiñña | one with the six higher knowledges | one possessing the six abhiññās |
+| suññata samādhi | empty concentration | concentration through contemplation of emptiness |
+| animitta samādhi | signless concentration | concentration through contemplation of the signless |
+| appaṇihita samādhi | undirected concentration | concentration through contemplation of the undirected |
+| suññata samāpatti | empty attainment | meditative attainment through contemplation of emptiness |
+| animitta samāpatti | signless attainment | meditative attainment through contemplation of the signless |
+| appaṇihita samāpatti | undirected attainment | meditative attainment through contemplation of the undirected |
+| pañcindriyāni | five faculties | faith, energy, mindfulness, concentration, wisdom |
+| pañca balāni | five powers | the same five qualities developed to the strength of power |
+| ariyo aṭṭhaṅgiko maggo | noble eightfold path | the path of right view, intention, speech, action, livelihood, effort, mindfulness, concentration |
+| sotāpattiphala | fruit of stream-entry | the fruition of the first stage of awakening |
+| sakadāgāmiphala | fruit of once-returning | the fruition of the second stage of awakening |
+| anāgāmiphala | fruit of non-returning | the fruition of the third stage of awakening |
+| arahatta | arahantship | the fruition of the fourth and final stage of awakening |
+| catto vanto mutto pahīno paṭinissaṭṭho ukkheṭito samukkheṭito | abandoned, spewed out, released, given up, renounced, cast off, utterly cast off | string of synonyms declaring a defilement fully relinquished |
