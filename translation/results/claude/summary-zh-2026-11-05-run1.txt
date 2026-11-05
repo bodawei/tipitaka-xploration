@@ -1,0 +1,13 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=8774, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=514, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 8774, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 514, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 208-209 (condensed prose summary)
+
+佛制故說上人法妄語之廣分別中，續以三行相等配列諸法：凡以「我曾入、我今入、我已入初禪與第二禪」、或「我是初禪與第二禪之得者、自在者」、或「初禪與第二禪已為我所證」等語，明知而說虛妄者，犯波羅夷。初禪與第三禪、初禪與第四禪，亦復如是。
+
+又以初禪配空解脫、無相解脫、無願解脫，配空、無相、無願三三昧，配空、無相、無願三等至，乃至配三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，以及須陀洹果、斯陀含果、阿那含果、阿羅漢果，如是一一以入定、得、自在、已證諸語故妄語者，皆犯波羅夷。
+
+復次，若言「我已入初禪、為初禪之得者自在者、初禪已為我所證，且我之貪已捨、瞋已捨、癡已捨，已吐、已脫、已斷、已棄捨、已除遣」；或乃至以七行相言「我心已離貪蓋、離瞋蓋、離癡蓋」而故妄語者，亦犯波羅夷。
+
+凡此諸罪，皆具故妄語之諸行相：說前先有「我當妄語」之心，正說時有「我正妄語」之心，說已有「我已妄語」之心，並違隱其見、違隱其忍可、違隱其意樂、違隱其實況。

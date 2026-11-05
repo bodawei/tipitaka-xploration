@@ -146,3 +146,13 @@ Managed automatically — new terms are appended as they first appear.
 | phalasacchikiriyā | realisation of the fruits | attainment of the four noble fruits |
 | kilesappahāna | abandoning of the defilements | the giving up of lust, hatred and delusion |
 | salākāvutta | food distributed by ticket | famine-time rationing by means of tokens |
+| indriya | faculty | the five spiritual faculties: faith, energy, mindfulness, concentration, wisdom |
+| bala | power | the five spiritual powers paralleling the five faculties |
+| ariya aṭṭhaṅgika magga | noble eightfold path | the eightfold path of the noble ones |
+| sotāpattiphala | fruit of stream-entry | the first of the four noble fruits |
+| sakadāgāmiphala | fruit of once-returning | the second of the four noble fruits |
+| anāgāmiphala | fruit of non-returning | the third of the four noble fruits |
+| arahatta | arahantship | the fourth and final noble fruit |
+| suññata samādhi | empty concentration | concentration through contemplation of emptiness |
+| animitta samādhi | signless concentration | concentration through contemplation of the signless |
+| appaṇihita samādhi | undirected concentration | concentration through contemplation of the undirected |

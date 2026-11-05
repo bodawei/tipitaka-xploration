@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=7042, completion_tokens=261, total_tokens=7303, prompt_tokens_details.cached_tokens=4608, prompt_cache_hit_tokens=4608, prompt_cache_miss_tokens=2434
+Raw usage JSON: {"prompt_tokens": 7042, "completion_tokens": 261, "total_tokens": 7303, "prompt_tokens_details": {"cached_tokens": 4608}, "prompt_cache_hit_tokens": 4608, "prompt_cache_miss_tokens": 2434}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 208-209 (condensed prose summary)
+
+此段屬波羅夷法中的妄語戒部分，廣列比丘以「三種方式」自稱證得禪定與聖果而作虛妄語的各類情況：或自言已入初禪乃至第四禪、已得禪定、已證禪定，或自言得空、無相、無願三解脫、三三昧、三等至，或自言得三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，乃至自言證須陀洹果、斯陀含果、阿那含果、阿羅漢果；又或自言貪瞋癡已斷、已吐、已解脫、已捨、已根除，或自言其心已離貪瞋癡之蓋障。凡明知而作此等虛妄語者，皆犯波羅夷。文中並明妄語成立的四項條件：說前先存「我將說妄語」之念，說時有「我正在說妄語」之念，說後有「我已說妄語」之念，並且違隱其見、忍可、意樂與實況而說異語。

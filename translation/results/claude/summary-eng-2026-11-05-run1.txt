@@ -1,0 +1,11 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=7901, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=519, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 7901, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 519, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 208-209 (condensed prose summary)
+
+A bhikkhu who, knowing it to be false, declares in any of the three ways — "I attained," "I attain," "I have attained," or "I am a gainer of it," "I am master of it," "it has been realised by me" — any pairing of the first jhāna with the second, third, or fourth jhāna, commits an offence entailing defeat. The same holds for the first jhāna paired with the empty, signless, or undirected liberation; with the empty, signless, or undirected concentration; with the empty, signless, or undirected attainment; with the three true knowledges; with the four foundations of mindfulness, the four right strivings, the four bases of psychic power; with the five faculties and the five powers; with the seven factors of enlightenment; with the noble eightfold path; and with the fruits of stream-entry, once-returning, non-returning, and arahantship — in every case a deliberate lie incurs an offence entailing defeat.
+
+Likewise if he claims the first jhāna together with the assertion that lust, hatred, or delusion has been cast off by him — vomited out, released, abandoned, relinquished, discarded, utterly discarded — that is an offence entailing defeat; and so too, in three or up to seven ways, if he claims the first jhāna together with the assertion that his mind is unobstructed by lust, by hatred, or by delusion.
+
+The defining factors are these: beforehand he knows "I shall speak falsely"; while speaking he knows "I am speaking falsely"; after speaking he knows "I have spoken falsely"; and he misrepresents his view, his belief, his preference, and his state.

@@ -175,3 +175,6 @@ Managed automatically — new terms are appended as they first appear.
 | anāgāmiphala | fruit of non-returning | the fruition of the third stage of awakening |
 | arahatta | arahantship | the fruition of the fourth and final stage of awakening |
 | catto vanto mutto pahīno paṭinissaṭṭho ukkheṭito samukkheṭito | abandoned, spewed out, released, given up, renounced, cast off, utterly cast off | string of synonyms declaring a defilement fully relinquished |
+| lābhī | one who has obtained | possessing an attainment, the first of the three modes of false claim |
+| vasī | master of it | having mastery over an attainment, the second of the three modes |
+| sacchikata | realized | personally verified by direct experience, the third of the three modes |
