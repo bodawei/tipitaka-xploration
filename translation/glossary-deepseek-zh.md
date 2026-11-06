@@ -214,3 +214,4 @@ Managed automatically — new terms are appended as they first appear.
 | sandiṭṭha sambhatta | 相識相親 | 相熟而親近之友伴 |
 | tayo ākārā | 三種方式 | 指「我已證入／我正證入／我已得自在」等三種表述方式 |
 | appamāda | 不放逸 | 此處未現，略 |
+| baddhacakkaṃ parivattakaṃ | 輪轉之環 | 將各根本配對輪轉而廣說之模式 |

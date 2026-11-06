@@ -1,0 +1,17 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=10375, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=826, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 10375, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 826, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 210-213 (condensed prose summary)
+
+佛陀繼續廣說上人法妄語之種種組合：以三行相（說前知將妄語、說時知在妄語、說已知已妄語）而故妄語者，若自稱「我曾入、正入、已入第二禪與第三禪」，或稱「我是第二禪、第三禪之得者、自在者」，或稱「我已現證第二禪與第三禪」，皆犯波羅夷。第二禪與第四禪之組合亦然。
+
+又以第二禪配合空解脫、無相解脫、無願解脫，以及空、無相、無願三種三昧與三種等至，乃至三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，以及須陀洹果、斯陀含果、阿那含果、阿羅漢果，如是一一組合而作故妄語者，皆犯波羅夷。又若稱「我已入第二禪，且我之貪已捨、已吐、已解脫、已斷、已棄捨、已除遣」，或說瞋已捨、癡已捨，或說「我心離貪蓋、離瞋蓋、離癡蓋」者，亦犯波羅夷。
+
+此外，於三行相乃至七行相（加上違隱其見、違隱其忍可、違隱其意樂、違隱其實況）中亦如是：如第二禪與第一禪相配而妄語者，犯波羅夷。如是應以每一項為根本，作結環輪轉，一一展開。
+
+第三禪與第四禪乃至第三禪與阿羅漢果相配，第三禪與貪瞋癡已捨、心離蓋障相配，第三禪與第一禪、第二禪相配，一一作故妄語者，皆犯波羅夷。
+
+又以「我心離癡蓋」為根本，配合第一禪、第二禪、第三禪、第四禪，配合空、無相、無願三解脫、三三昧、三等至，配合三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，配合四沙門果乃至阿羅漢果，以及配合「我貪瞋癡已捨、已吐、已斷、已棄捨、已除遣」、「我心離貪蓋、離瞋蓋」等，凡以三行相乃至七行相而故妄語者，一一皆犯波羅夷。
+
+如是以一根本廣說者，二根本以上乃至諸多根本之組合，亦應依此方式一一廣說。

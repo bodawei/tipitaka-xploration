@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=8093, completion_tokens=263, total_tokens=8356, prompt_tokens_details.cached_tokens=4608, prompt_cache_hit_tokens=4608, prompt_cache_miss_tokens=3485
+Raw usage JSON: {"prompt_tokens": 8093, "completion_tokens": 263, "total_tokens": 8356, "prompt_tokens_details": {"cached_tokens": 4608}, "prompt_cache_hit_tokens": 4608, "prompt_cache_miss_tokens": 3485}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 210-213 (condensed prose summary)
+
+佛陀於舍衛城制此戒。時值饑饉，跋求摩河畔諸比丘因修不淨觀而生厭患，或自殺、或互請他人殺己、或尋求持刀者了斷性命。世尊知之，乃說入出息念三昧，令眾安住。其後世尊集眾制戒：若比丘故意以實際未證之上人法——如自稱得禪定、解脫、三明、念處、正勤、神足、五根、五力、覺支、八聖道、四沙門果，或自稱斷盡貪瞋癡、心離蓋障——向他人宣說，即犯波羅夷，不共住。宣說方式有三：自稱「我已證入」、「我正證入」、「我已得自在」；宣說時心中先存欺誑之念、正說時知為妄語、說已亦自知所說虛妄，並有違隱其見、忍可、意樂、實況之四種覆藏。如此以每一根本法門類推展轉，構成種種組合，皆以故妄語之罪成立波羅夷。
