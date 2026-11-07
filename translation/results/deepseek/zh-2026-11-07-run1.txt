@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=5615, completion_tokens=324, total_tokens=5939, prompt_tokens_details.cached_tokens=4864, prompt_cache_hit_tokens=4864, prompt_cache_miss_tokens=751
+Raw usage JSON: {"prompt_tokens": 5615, "completion_tokens": 324, "total_tokens": 5939, "prompt_tokens_details": {"cached_tokens": 4864}, "prompt_cache_hit_tokens": 4864, "prompt_cache_miss_tokens": 751}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, verses 214
+
+[214] 以三種方式……乃至以七種方式證入初禪、第二禪、第三禪、第四禪，證入空解脫、無相解脫、無願解脫，證入空三昧、無相三昧、無願三昧，證入空等至、無相等至、無願等至，證入三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，證入須陀洹果、斯陀含果、阿那含果、阿羅漢果……我正證入……我已證入……乃至我的貪已捨、我的瞋已捨、我的癡已捨，已吐出、已解脫、已斷除、已棄遣、已根除、已徹底根除。我的心離貪蓋障，我的心離瞋蓋障，我的心離癡蓋障——若明知而說虛妄語，犯波羅夷罪。在說之前，他心想「我將說虛妄語」；正在說時，他心想「我說虛妄語」；說完之后，他心想「我已說虛妄語」——這便是違隱其見、違隱其忍可、違隱其意樂、違隱其實況。

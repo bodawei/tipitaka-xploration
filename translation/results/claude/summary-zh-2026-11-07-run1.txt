@@ -1,0 +1,7 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=6574, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=364, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 6574, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 364, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 214 (condensed prose summary)
+
+三種行相乃至七種行相而故作妄語，自稱已入初禪、第二禪、第三禪、第四禪，或空解脫、無相解脫、無願解脫，空三昧、無相三昧、無願三昧，空等至、無相等至、無願等至，或稱證得三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，乃至須陀洹果、斯陀含果、阿那含果、阿羅漢果——說「我曾入」、「我今入」、「我已成就」等；又自稱「我貪已捨、瞋已捨、癡已捨，已吐、已脫、已斷、已捨遣、已除遣、已全除遣」，「我心離貪蓋障、離瞋蓋障、離癡蓋障」：如是明知而妄語者，犯波羅夷。其所具行相為：說前先有「我將妄語」之心，正說時有「我正妄語」之心，說已有「我已妄語」之想，並且違隱其見、違隱其忍可、違隱其意樂、違隱其實況。

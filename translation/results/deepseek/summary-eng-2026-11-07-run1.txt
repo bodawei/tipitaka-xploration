@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=4749, completion_tokens=221, total_tokens=4970, prompt_tokens_details.cached_tokens=4096, prompt_cache_hit_tokens=4096, prompt_cache_miss_tokens=653
+Raw usage JSON: {"prompt_tokens": 4749, "completion_tokens": 221, "total_tokens": 4970, "prompt_tokens_details": {"cached_tokens": 4096}, "prompt_cache_hit_tokens": 4096, "prompt_cache_miss_tokens": 653}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 214 (condensed prose summary)
+
+If a bhikkhu, in various ways (from three up to seven modes), claims to have entered and to enter the four jhānas, the empty, signless and undirected liberations, the corresponding concentrations and attainments, the three true knowledges, the four foundations of mindfulness, the four right strivings, the four bases of psychic power, the five faculties, the five powers, the seven factors of enlightenment, the noble eightfold path, and the fruits of stream-entry, once-returning, non-returning and arahantship, saying that greed, hatred and delusion have been abandoned, spewed out, released, given up, renounced, cast off and utterly cast off, and that his mind is unobstructed by them — then, while deliberately speaking falsehood, he incurs a pārājika offence. The offence applies when, before speaking, he intends to lie; while speaking, knows he is lying; and afterwards, knows a lie was spoken — misrepresenting his view, belief, preference and state.

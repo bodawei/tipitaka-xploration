@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=5413, completion_tokens=274, total_tokens=5687, prompt_tokens_details.cached_tokens=4608, prompt_cache_hit_tokens=4608, prompt_cache_miss_tokens=805
+Raw usage JSON: {"prompt_tokens": 5413, "completion_tokens": 274, "total_tokens": 5687, "prompt_tokens_details": {"cached_tokens": 4608}, "prompt_cache_hit_tokens": 4608, "prompt_cache_miss_tokens": 805}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 214 (condensed prose summary)
+
+佛陀先以三種乃至七種方式，將四禪、空解脫、無相解脫、無願解脫、空三昧、無相三昧、無願三昧、空等至、無相等至、無願等至，以及三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，乃至須陀洹果、斯陀含果、阿那含果、阿羅漢果，統攝為「我已證入、我正證入、我已得自在」三類表述方式，並進而宣稱貪瞋癡已斷、已吐、已解脫、已捨、已根除，心已離貪瞋癡之蓋障。佛陀指出：若比丘明知而故作妄語，自稱得上人法，即犯波羅夷。此妄語罪之成立，須具備三時：言說之前先起「我將說妄語」之念，正說時知「我正在說妄語」，說畢知「我已說妄語」；且以違隱其見、違隱其忍可、違隱其意樂、違隱其實況四種方式而說，便構成犯戒。
