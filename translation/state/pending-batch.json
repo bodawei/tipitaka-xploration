@@ -1,15 +1,15 @@
 {
-  "submitted_at": "2026-11-07T17:56:04Z",
+  "submitted_at": "2026-11-08T18:11:35Z",
   "position": {
     "file": "vin01m.mul.xml",
-    "next_verse": 215
+    "next_verse": 216
   },
   "chunk_size": 10,
   "file": "vin01m.mul.xml",
-  "verse_range": "215",
+  "verse_range": "216-217",
   "batches": {
     "claude": {
-      "id": "msgbatch_01GthjdSkB5jLQGmMjUmw9eB",
+      "id": "msgbatch_01EnfJ6K34rWqLFLgDd6Ha3u",
       "model": "claude-opus-5"
     }
   }

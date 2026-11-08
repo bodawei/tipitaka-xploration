@@ -1,0 +1,11 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=6933, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=518, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 6933, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 518, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 215 (condensed prose summary)
+
+佛續說大妄語之種種構成：若比丘本欲言「我入初禪」，而實際所說為「我入第二禪」、乃至第三禪、第四禪，凡具三行相（說前已知將說妄、說時知在說妄、說後知已說妄）而故作妄語者，對方若了解其語，即犯波羅夷；對方若不了解，則犯偷蘭遮。
+
+如是以三行相乃至七行相類推，凡自稱證得空解脫、無相解脫、無願解脫，空三昧、無相三昧、無願三昧，空等至、無相等至、無願等至，三明，四念處、四正勤、四神足、五根、五力、七覺支、八聖道，以及須陀洹果、斯陀含果、阿那含果、阿羅漢果等者，皆依此例判罪。又若自言「我貪已捨、瞋已捨、癡已捨，已吐、已脫、已斷、已棄捨、已除遣、已全除遣」，或言「我心已離貪蓋、離瞋蓋、離癡蓋」，而故作妄語者，他人領解則波羅夷，不領解則偷蘭遮。
+
+所謂七行相，即於上述三行相之外，更加違隱其見、違隱其忍可、違隱其意樂、違隱其實況四者：說前即有「我將說妄」之心，說時有「我正說妄」之心，說後有「我已說妄」之念，並隱覆自己真實之見解、所忍可、所好樂與實際情狀而說異語。

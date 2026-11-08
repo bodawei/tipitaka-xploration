@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=5866, completion_tokens=389, total_tokens=6255, prompt_tokens_details.cached_tokens=4992, prompt_cache_hit_tokens=4992, prompt_cache_miss_tokens=874
+Raw usage JSON: {"prompt_tokens": 5866, "completion_tokens": 389, "total_tokens": 6255, "prompt_tokens_details": {"cached_tokens": 4992}, "prompt_cache_hit_tokens": 4992, "prompt_cache_miss_tokens": 874}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, verses 215
+
+[215] 欲說「我以三種方式入初禪」而故意妄語說「我入第二禪」，若對方明白其意，犯波羅夷；若對方不明白，犯偷蘭遮。欲說「我以三種方式入初禪」而故意妄語說「我入第三禪」，若對方明白其意，犯波羅夷；若對方不明白，犯偷蘭遮。欲說「我以三種方式入初禪」而故意妄語說「我入第四禪」，若對方明白其意，犯波羅夷；若對方不明白，犯偷蘭遮。欲說「我以三種方式……乃至七種方式入初禪」而故意妄語說「我入空解脫……無相解脫……無願解脫……空定……無相定……無願定……空等至……無相等至……無願等至……三明……四念處……四正勤……四神足……五根……五力……七覺支……八聖道……須陀洹果……斯陀含果……阿那含果……阿羅漢果」，乃至說「我已經……貪已斷除……瞋已斷除……癡已斷除，已吐出、已解脫、已捨棄、已根除、已徹底根除。我心離貪蓋障……我心離瞋蓋障……我心離癡蓋障」，如此故意妄語，若對方明白其意，犯波羅夷；若對方不明白，犯偷蘭遮。其先有意「我將說妄語」，說時有「我說妄語」之念，說後有「我已說妄語」之念，且違隱其見、違隱其忍可、違隱其意樂、違隱其實況。

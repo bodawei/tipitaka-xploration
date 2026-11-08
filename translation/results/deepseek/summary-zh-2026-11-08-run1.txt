@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=5664, completion_tokens=334, total_tokens=5998, prompt_tokens_details.cached_tokens=4736, prompt_cache_hit_tokens=4736, prompt_cache_miss_tokens=928
+Raw usage JSON: {"prompt_tokens": 5664, "completion_tokens": 334, "total_tokens": 5998, "prompt_tokens_details": {"cached_tokens": 4736}, "prompt_cache_hit_tokens": 4736, "prompt_cache_miss_tokens": 928}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 215 (condensed prose summary)
+
+此段屬波羅夷犍度中「大妄語」之廣分別。若比丘欲說「我入初禪」，而實無此事，卻故意改口稱「我入第二禪」乃至第三、第四禪，或稱已證空解脫、無相解脫、無願解脫，或稱得空、無相、無願之定與等至，或稱得三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，或稱證須陀洹果、斯陀含果、阿那含果、阿羅漢果；乃至自稱「我之貪已斷、瞋已斷、癡已斷，已吐、已解、已捨、已根除」，又或言「我之心已離貪、瞋、癡之蓋障」。凡如是明知而說虛妄語，若對方領解其語，犯波羅夷；若對方不解，則犯偷蘭遮。凡於未說時先存「我將說妄語」之念，正說時知「我正在說妄語」，說已復知「我已說妄語」，並以隱覆其見、隱覆其忍可、隱覆其意樂、隱覆其實況之心而說，皆成重罪。此即以三種乃至七種方式，將諸禪、解脫、定、等至、道品、聖果與斷煩惱之說輪轉配對而廣為分別。

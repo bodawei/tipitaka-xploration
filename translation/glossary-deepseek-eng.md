@@ -178,3 +178,5 @@ Managed automatically — new terms are appended as they first appear.
 | lābhī | one who has obtained | possessing an attainment, the first of the three modes of false claim |
 | vasī | master of it | having mastery over an attainment, the second of the three modes |
 | sacchikata | realized | personally verified by direct experience, the third of the three modes |
+| vimutti | liberation | the empty, signless and undirected liberations listed among superhuman states |
+| pubbeva musā bhaṇissanti | before speaking, "I shall speak falsely" | the first of the three phases of deliberate false speech |

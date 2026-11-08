@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=5000, completion_tokens=218, total_tokens=5218, prompt_tokens_details.cached_tokens=4096, prompt_cache_hit_tokens=4096, prompt_cache_miss_tokens=904
+Raw usage JSON: {"prompt_tokens": 5000, "completion_tokens": 218, "total_tokens": 5218, "prompt_tokens_details": {"cached_tokens": 4096}, "prompt_cache_hit_tokens": 4096, "prompt_cache_miss_tokens": 904}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 215 (condensed prose summary)
+
+Though one may intend to speak of the first jhāna and instead deliberately lies about attaining the second, third, or fourth jhāna—or about any of the liberations, attainments, the three true knowledges, the foundations of mindfulness, right strivings, bases of psychic power, faculties, powers, factors of enlightenment, the noble eightfold path, or any of the fruits of the path up to arahantship, or claims to have abandoned greed, hatred, and delusion and to have a mind unobstructed by them—the offence is a pārājika if he understands his falsehood, and a grave offence if he does not. The same applies to lying about meditative states from the first jhāna up through the higher attainments. The full offence requires that the thought to lie arise beforehand, that he knows while speaking that he is lying, and that he recognize afterward that he has lied; there is an offence if he misrepresents his view, his belief, his preference, or his state.
