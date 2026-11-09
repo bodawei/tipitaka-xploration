@@ -1,0 +1,9 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=5630, completion_tokens=350, total_tokens=5980, prompt_tokens_details.cached_tokens=4992, prompt_cache_hit_tokens=4992, prompt_cache_miss_tokens=638
+Raw usage JSON: {"prompt_tokens": 5630, "completion_tokens": 350, "total_tokens": 5980, "prompt_tokens_details": {"cached_tokens": 4992}, "prompt_cache_hit_tokens": 4992, "prompt_cache_miss_tokens": 638}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, verses 216-217
+
+[216] 欲說「我以三種方式入第二禪」而實說「我入第三禪」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮。欲說「我以三種方式入第二禪」而實說「我入第四禪」……乃至……欲說「我以三種方式入第二禪」而實說「我以癡故心離蓋障」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮。欲說「我以三種方式……乃至……七種方式入第二禪」而實說「我入初禪」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮……乃至……違隱其實況。
+
+[217] 欲說「我以三種方式，因癡故心離蓋障」而實說「我入初禪」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮。欲說「我以三種方式……乃至……七種方式，因癡故心離蓋障」而實說「我因瞋故心離蓋障」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮……乃至……違隱其實況。

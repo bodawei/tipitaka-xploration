@@ -1,0 +1,20 @@
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, verses 216-217
+
+[216] One who, wishing to say "I attain the second jhāna," says deliberately falsely "I attain the third jhāna," while knowing it to be false: if he is aware of it, there is an offence entailing defeat; if he is not aware of it, there is a grave offence. One who, wishing to say "I attain the second jhāna," says deliberately falsely "I attain the fourth jhāna" … "… and by delusion my mind is unobstructed," while knowing it to be false: if he is aware of it, there is an offence entailing defeat; if he is not aware of it, there is a grave offence. One who, wishing to say "I attain the second jhāna," says deliberately falsely "I attain the first jhāna" — by three ways … up to seven ways — while knowing it to be false: if he is aware of it, there is an offence entailing defeat; if he is not aware of it, there is a grave offence … up to "he misrepresents his state."
+
+[217] One who, wishing to say "by delusion my mind is unobstructed," says deliberately falsely "I attain the first jhāna," while knowing it to be false: if he is aware of it, there is an offence entailing defeat; if he is not aware of it, there is a grave offence. One who, wishing to say "by delusion my mind is unobstructed" — by three ways … up to seven ways — says deliberately falsely "by hatred my mind is unobstructed," while knowing it to be false: if he is aware of it, there is an offence entailing defeat; if he is not aware of it, there is a grave offence … up to "he misrepresents his state."
+
+----------------------------------------
+Traditional Chinese:
+
+[216] 欲說「我以三種方式入第二禪」而實說「我入第三禪」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮。欲說「我以三種方式入第二禪」而實說「我入第四禪」……乃至……欲說「我以三種方式入第二禪」而實說「我以癡故心離蓋障」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮。欲說「我以三種方式……乃至……七種方式入第二禪」而實說「我入初禪」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮……乃至……違隱其實況。
+
+[217] 欲說「我以三種方式，因癡故心離蓋障」而實說「我入初禪」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮。欲說「我以三種方式……乃至……七種方式，因癡故心離蓋障」而實說「我因瞋故心離蓋障」，若明知而說虛妄語，且對方領解其意，犯波羅夷；若對方不領解其意，犯偷蘭遮……乃至……違隱其實況。
+
+----------------------------------------
+Original (Pali, IAST):
+
+[216] Tīhākārehi dutiyaṃ jhānaṃ samāpajjinti vattukāmo tatiyaṃ jhānaṃ samāpajjinti sampajānamusā bhaṇantassa paṭivijānantassa āpatti pārājikassa; na paṭivijānantassa āpatti thullaccayassa. Tīhākārehi dutiyaṃ jhānaṃ samāpajjinti vattukāmo catutthaṃ jhānaṃ samāpajjinti…pe… mohā ca me cittaṃ vinīvaraṇanti sampajānamusā bhaṇantassa paṭivijānantassa āpatti pārājikassa; na paṭivijānantassa āpatti thullaccayassa. Tīhākārehi…pe… sattahākārehi dutiyaṃ jhānaṃ samāpajjinti vattukāmo paṭhamaṃ jhānaṃ samāpajjinti sampajānamusā bhaṇantassa paṭivijānantassa āpatti pārājikassa; na paṭivijānantassa āpatti thullaccayassa…pe… vinidhāya bhāvaṃ.
+
+[217] Tīhākārehi mohā me cittaṃ vinīvaraṇanti vattukāmo paṭhamaṃ jhānaṃ samāpajjinti sampajānamusā bhaṇantassa paṭivijānantassa āpatti pārājikassa; na paṭivijānantassa āpatti thullaccayassa. Tīhākārehi…pe… sattahākārehi mohā me cittaṃ vinīvaraṇanti vattukāmo dosā me cittaṃ vinīvaraṇanti sampajānamusā bhaṇantassa paṭivijānantassa āpatti pārājikassa; na paṭivijānantassa āpatti thullaccayassa…pe… vinidhāya bhāvaṃ.

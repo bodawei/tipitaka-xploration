@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=5425, completion_tokens=126, total_tokens=5551, prompt_tokens_details.cached_tokens=4736, prompt_cache_hit_tokens=4736, prompt_cache_miss_tokens=689
+Raw usage JSON: {"prompt_tokens": 5425, "completion_tokens": 126, "total_tokens": 5551, "prompt_tokens_details": {"cached_tokens": 4736}, "prompt_cache_hit_tokens": 4736, "prompt_cache_miss_tokens": 689}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 216-217 (condensed prose summary)
+
+諸比丘以三種方式乃至七種方式，自稱「我入第二禪」而實欲說「入第三禪」等，如是明知而故作妄語，若對方領解其意，犯波羅夷；若不領解，犯偷蘭遮。此中就禪定層次之互換、煩惱蓋障之有無（如「我心離貪瞋癡蓋」）等種種說法，一一配對輪轉而廣說；凡明知故說、對方領解者皆波羅夷，不領解者皆偷蘭遮。

@@ -1,0 +1,7 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=6575, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=339, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 6575, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 339, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 216-217 (condensed prose summary)
+
+佛陀就「故妄語說上人法」一一分別其成罪相：若比丘本欲說「我入第二禪」，卻故意妄語說「我入第三禪」或「我入第四禪」，乃至說「我心已離癡蓋障」等，只要具足三種行相（乃至七種行相，並違隱其見、其忍可、其意樂、其實況），對方若領解其語，犯波羅夷；對方若不領解，則犯偷蘭遮。同樣地，本欲說「我入第二禪」而說「我入初禪」，或本欲說「我心已離癡蓋障」而說「我入初禪」、說「我心已離瞋蓋障」等，一切互相交換錯說之情形，判罪亦復如是：聽者領解則成波羅夷，不領解則成偷蘭遮。如是諸禪、諸解脫、諸等至、諸道果與斷除煩惱等上人法，彼此互換而故作妄語者，皆依此例類推而定其罪。

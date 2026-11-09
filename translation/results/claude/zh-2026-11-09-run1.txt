@@ -1,0 +1,9 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=6889, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=385, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 6889, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 385, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, verses 216-217
+
+[216] 以三行相，欲說「我入第二禪」而說「我入第三禪」，若故妄語，對方領解者得波羅夷罪；對方不領解者得偷蘭遮。以三行相，欲說「我入第二禪」而說「我入第四禪」……乃至……「我心離癡蓋障」，若故妄語，對方領解者得波羅夷罪；對方不領解者得偷蘭遮。以三行相……乃至……以七行相，欲說「我入第二禪」而說「我入初禪」，若故妄語，對方領解者得波羅夷罪；對方不領解者得偷蘭遮……乃至……違隱其實況。
+
+[217] 以三行相，欲說「我心離癡蓋障」而說「我入初禪」，若故妄語，對方領解者得波羅夷罪；對方不領解者得偷蘭遮。以三行相……乃至……以七行相，欲說「我心離癡蓋障」而說「我心離瞋蓋障」，若故妄語，對方領解者得波羅夷罪；對方不領解者得偷蘭遮……乃至……違隱其實況。

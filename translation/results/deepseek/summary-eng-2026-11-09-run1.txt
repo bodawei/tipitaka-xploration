@@ -1,0 +1,7 @@
+Usage [deepseek · deepseek-flash · direct API]: prompt_tokens=4817, completion_tokens=219, total_tokens=5036, prompt_tokens_details.cached_tokens=4096, prompt_cache_hit_tokens=4096, prompt_cache_miss_tokens=721
+Raw usage JSON: {"prompt_tokens": 4817, "completion_tokens": 219, "total_tokens": 5036, "prompt_tokens_details": {"cached_tokens": 4096}, "prompt_cache_hit_tokens": 4096, "prompt_cache_miss_tokens": 721}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 216-217 (condensed prose summary)
+
+The Buddha then examines claims to superhuman states made in the context of the jhānas. He sets out the permutations in which a bhikkhu, intending to say one thing about the jhānas, actually says another — for example intending to speak of the second jhāna but speaking of the third, or of the fourth, or of the first. In each case, if he speaks deliberate falsehood with full awareness of what he is saying, he incurs an offence entailing defeat; if he does not recognise the disparity, he incurs only a grave offence. The same analysis is extended across three to seven modes, and to the formula "my mind is unobstructed by delusion," including cases where a bhikkhu meaning to speak of one obstruction (delusion, hatred, and so on) instead speaks of another. Throughout, full awareness of the falsehood brings the offence entailing defeat, while lack of recognition brings the grave offence. The passage concludes with the exemptions of misrepresenting one's view, belief, preference, or state.
