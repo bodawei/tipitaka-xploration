@@ -1,0 +1,11 @@
+Usage [claude · claude-opus-5 · batch API, 50% off]: input_tokens=7509, cache_creation_input_tokens=0, cache_read_input_tokens=0, cache_creation.ephemeral_5m_input_tokens=0, cache_creation.ephemeral_1h_input_tokens=0, output_tokens=494, output_tokens_details.thinking_tokens=0, service_tier=batch, inference_geo=global, speed=standard
+Raw usage JSON: {"input_tokens": 7509, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 494, "output_tokens_details": {"thinking_tokens": 0}, "service_tier": "batch", "inference_geo": "global", "speed": "standard"}
+
+Pārājikapāḷi — 1. Pārājikakaṇḍaṃ
+vin01m.mul.xml, section verses 218-219 (condensed prose summary)
+
+三行相乃至七行相，若比丘欲說己得初禪、二禪、三禪、四禪，得空、無相、無願三解脫，得空、無相、無願三昧與等至，得三明、四念處、四正勤、四神足、五根、五力、七覺支、八聖道，證須陀洹果、斯陀含果、阿那含果、阿羅漢果，或言「我貪已捨、瞋已捨、癡已捨，已吐、已離、已斷、已捨遣、已除棄」，又言「我心離貪蓋、離瞋蓋、離癡蓋」，而明知故說虛妄之語者：對方若領解其義，犯波羅夷；若不領解，犯偷蘭遮。
+
+如是輾轉類推：欲說二禪以下諸法，乃至欲說「我心離癡蓋」，而實說「我入初禪」者；欲說三禪、四禪以下乃至「我心離癡蓋」、「我入初禪」，而實說「我入二禪」者；乃至欲說「我心離貪蓋」而實說「我心離瞋蓋」者，皆同此判：領解則波羅夷，不領解則偷蘭遮。
+
+凡此故妄語，皆具三時之行相：說前先有「我當說妄語」之心，正說時有「我說妄語」之想，說已有「我已說妄語」之覺，並且違隱其見、違隱其忍可、違隱其意樂、違隱其實況。
