@@ -43,8 +43,8 @@ submitted on one day and finished on the next (see "Batching" below). Each run:
       batch (`deepseek`, which has no batch API).
    3. **Finish the chunk** for every provider together: email each
       translation separately via the Resend API, tagged by provider
-      (`Tipitaka reading [claude]: …`, `Tipitaka reading [deepseek]
-      (Traditional Chinese): …`, and so on); if the chunk completed a section
+      (`Verse 1-45 | Claude | English | Tipitaka reading file, <file>.xml
+      — …`, and so on); if the chunk completed a section
       (see "Section summaries"), email the condensed prose summaries too;
       write the archive files under `translation/results/<provider>/` (see
       `translation/results/README.md`); append newly-introduced key terms to

@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from . import archive, batch, diagnostics, glossary, mail, providers, source, state, translation
+from .config import PROVIDERS
 from .prompts import LANGUAGES
 from .settings import Settings
 
@@ -36,8 +37,8 @@ def _heading_str(heading, fallback):
     return " — ".join(heading) if heading else fallback
 
 
-def _label_suffix(lang):
-    return "" if lang["code"] == "eng" else f" ({lang['label']})"
+def _subject_prefix(name, lang, verse_range):
+    return f"Verse {verse_range} | {PROVIDERS[name]['label']} | {lang['label']} | "
 
 
 @dataclass
@@ -132,8 +133,8 @@ def send_summaries(name, filename, section_verses, outputs, account, spool_dir):
         mail.send_email_or_spool(
             account,
             spool_dir,
-            f"Tipitaka section summary [{name}]{_label_suffix(lang)}: "
-            f"{filename} verses {sec_range} — {sec_heading_str}",
+            f"{_subject_prefix(name, lang, sec_range)}"
+            f"Tipitaka section summary file, {filename} — {sec_heading_str}",
             f"{usage[code]}\n\n{sec_header}\n{texts[code]}",
             f"{filename} section summary {sec_range} [{name}] ({lang['label']})",
         )
@@ -161,8 +162,8 @@ def finish_chunk(chunk, outputs, settings, account):
             mail.send_email_or_spool(
                 account,
                 settings.spool_dir,
-                f"Tipitaka reading [{name}]{_label_suffix(lang)}: "
-                f"{chunk.filename} verses {chunk.verse_range} — {chunk.heading_str}",
+                f"{_subject_prefix(name, lang, chunk.verse_range)}"
+                f"Tipitaka reading file, {chunk.filename} — {chunk.heading_str}",
                 f"{usage[name][code]}\n\n{chunk.header}\n{translations[name][code]}",
                 f"{chunk.filename} verses {chunk.verse_range} [{name}] ({lang['label']})",
             )
