@@ -1,5 +1,5 @@
 {
-  "claude": true,
+  "claude": false,
   "kimi": false,
-  "deepseek": true
+  "deepseek": false
 }
